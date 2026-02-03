@@ -1,0 +1,53 @@
+# Build artifacts
+build/
+out/
+*.o
+*.so
+*.a
+*.dylib
+*.dll
+
+# Binaries
+aapt
+aapt_64
+aapt2
+aapt2_64
+
+# Cloned Android source
+frameworks-base/
+android-build/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile.cmake
+
+# Ninja
+.ninja_deps
+.ninja_log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+/tmp/
+*.tmp
+*.bak
+*.log
+
+# Protobuf generated files
+*.pb.h
+*.pb.cc
+
+# Dependencies
+node_modules/
+vendor/
