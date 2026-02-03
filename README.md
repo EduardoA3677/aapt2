@@ -32,6 +32,30 @@ Y compila los siguientes binarios:
   - expat
   - protobuf
 
+## Documentación
+
+- **[INSTALL.md](INSTALL.md)** - Guía de instalación detallada paso a paso
+- **[USAGE.md](USAGE.md)** - Ejemplos de uso y casos comunes
+- **[.github/workflows/README.md](.github/workflows/README.md)** - Documentación de workflows de CI/CD
+
+## Inicio Rápido
+
+### Opción A: Usar Binarios Pre-compilados (Más Rápido)
+
+Si ya existen releases en el repositorio:
+
+```bash
+# Descargar binarios para Linux
+wget https://github.com/EduardoA3677/aapt2/releases/latest/download/aapt2-linux-x64.tar.gz
+tar -xzf aapt2-linux-x64.tar.gz
+sudo install -m 755 aapt2 /usr/local/bin/
+
+# Verificar
+aapt2 version
+```
+
+### Opción B: Compilar Localmente
+
 ## Instalación Rápida
 
 ### Opción 1: Script Automatizado (Recomendado)

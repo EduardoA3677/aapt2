@@ -53,8 +53,8 @@ Android.mk
 /tools/aapt2/proto/
 EOF
     
-    echo "Step 3: Fetching tag $TAG (this may take a while)..."
-    git fetch --depth 1 origin tag $TAG
+    echo "Step 3: Fetching refs/tags/$TAG (this may take a while)..."
+    git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
     
     echo "Step 4: Checking out tag $TAG..."
     git checkout $TAG

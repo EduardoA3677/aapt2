@@ -1,5 +1,13 @@
 name: Build and Release AAPT2
 
+# Este workflow compila las herramientas AAPT desde el código fuente de Android:
+# - aapt2: Android Asset Packaging Tool 2
+# - aapt2_64: Versión de 64 bits de AAPT2  
+# - aapt: Android Asset Packaging Tool (versión 1)
+# - aapt_64: Versión de 64 bits de AAPT
+# Desde: https://android.googlesource.com/platform/frameworks/base
+# Tag: refs/tags/android-16.0.0_r4
+
 on:
   push:
     tags:
@@ -74,8 +82,8 @@ jobs:
           EOF
           
           # Fetch and checkout the tag
-          echo "Fetching tag android-16.0.0_r4..."
-          git fetch --depth 1 origin tag android-16.0.0_r4
+          echo "Fetching refs/tags/android-16.0.0_r4..."
+          git fetch --depth 1 origin refs/tags/android-16.0.0_r4:refs/tags/android-16.0.0_r4
           git checkout android-16.0.0_r4
           
           echo "Source cloned successfully"
@@ -290,8 +298,8 @@ jobs:
           EOF
           
           # Fetch and checkout the tag
-          echo "Fetching tag android-16.0.0_r4..."
-          git fetch --depth 1 origin tag android-16.0.0_r4
+          echo "Fetching refs/tags/android-16.0.0_r4..."
+          git fetch --depth 1 origin refs/tags/android-16.0.0_r4:refs/tags/android-16.0.0_r4
           git checkout android-16.0.0_r4
           
           echo "Source cloned successfully"
