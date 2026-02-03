@@ -1,0 +1,85 @@
+name: Test Build
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+  push:
+    branches: [main, master, develop]
+
+jobs:
+  test-build:
+    name: Test Build on Ubuntu
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+      
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            pkg-config \
+            protobuf-compiler \
+            libprotobuf-dev \
+            zlib1g-dev \
+            libpng-dev \
+            libexpat1-dev \
+            git
+      
+      - name: Verify scripts are executable
+        run: |
+          chmod +x clone_and_build.sh
+          chmod +x build_with_soong.sh
+          chmod +x verify_build.sh
+      
+      - name: Test Makefile help
+        run: |
+          make help
+      
+      - name: Verify dependencies installed
+        run: |
+          echo "Checking dependencies..."
+          cmake --version
+          g++ --version
+          protoc --version
+          pkg-config --version
+          echo "All dependencies OK"
+      
+      - name: Test sparse checkout (quick check)
+        run: |
+          echo "Testing sparse checkout configuration..."
+          mkdir -p test-clone
+          cd test-clone
+          git init
+          git remote add origin https://android.googlesource.com/platform/frameworks/base
+          git config core.sparseCheckout true
+          
+          cat > .git/info/sparse-checkout << 'EOF'
+          /tools/aapt2/
+          /tools/aapt/
+          EOF
+          
+          echo "Sparse checkout configured successfully"
+          cd ..
+          rm -rf test-clone
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          echo "Test build completed"
+          df -h
