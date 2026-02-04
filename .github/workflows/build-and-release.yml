@@ -112,6 +112,11 @@ jobs:
           set(CMAKE_CXX_STANDARD_REQUIRED ON)
           set(CMAKE_BUILD_TYPE Release)
           
+          # Disable benchmarks globally to avoid target name conflicts
+          set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Disable benchmark testing" FORCE)
+          set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "Disable benchmark install" FORCE)
+          set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "Disable benchmark gtest" FORCE)
+          
           # Build dependencies from source
           # Note: The workflow clones repos into short directory names (base, core, logging)
           # while clone_and_build.sh uses full AOSP names (frameworks-base, system-core, liblog).
@@ -171,11 +176,17 @@ jobs:
           
           # Build boringssl from source (SSL library)
           if(EXISTS ${CMAKE_SOURCE_DIR}/../boringssl/CMakeLists.txt)
+              # Disable benchmark build in boringssl to avoid target name conflicts
+              set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+              set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
               add_subdirectory(${CMAKE_SOURCE_DIR}/../boringssl ${CMAKE_BINARY_DIR}/boringssl)
           endif()
           
           # Build expat from source (XML parser)
           if(EXISTS ${CMAKE_SOURCE_DIR}/../expat/expat/CMakeLists.txt)
+              # Disable benchmark and examples build in expat to avoid target name conflicts
+              set(EXPAT_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+              set(EXPAT_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
               add_subdirectory(${CMAKE_SOURCE_DIR}/../expat/expat ${CMAKE_BINARY_DIR}/expat)
           endif()
           
