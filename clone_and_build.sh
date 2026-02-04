@@ -347,6 +347,8 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/../fmtlib ${CMAKE_BINARY_DIR}/fmt)
 # Build libbase from source (Android base library) if available
 if(EXISTS ${CMAKE_SOURCE_DIR}/../libbase/CMakeLists.txt)
     add_subdirectory(${CMAKE_SOURCE_DIR}/../libbase ${CMAKE_BINARY_DIR}/libbase)
+elseif(EXISTS ${CMAKE_SOURCE_DIR}/../libbase/base/CMakeLists.txt)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/../libbase/base ${CMAKE_BINARY_DIR}/libbase)
 endif()
 
 # Build liblog from source (Android logging library) if available

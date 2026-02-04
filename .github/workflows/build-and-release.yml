@@ -124,6 +124,8 @@ jobs:
           # We'll include it in the build if it has CMakeLists.txt
           if(EXISTS ${CMAKE_SOURCE_DIR}/../libbase/CMakeLists.txt)
               add_subdirectory(${CMAKE_SOURCE_DIR}/../libbase ${CMAKE_BINARY_DIR}/libbase)
+          elseif(EXISTS ${CMAKE_SOURCE_DIR}/../libbase/base/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../libbase/base ${CMAKE_BINARY_DIR}/libbase)
           endif()
           
           # Build liblog from source (Android logging library)
@@ -143,6 +145,8 @@ jobs:
           # Build libziparchive from source (Android ZIP library)
           if(EXISTS ${CMAKE_SOURCE_DIR}/../libziparchive/CMakeLists.txt)
               add_subdirectory(${CMAKE_SOURCE_DIR}/../libziparchive ${CMAKE_BINARY_DIR}/libziparchive)
+          elseif(EXISTS ${CMAKE_SOURCE_DIR}/../libziparchive/libziparchive/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../libziparchive/libziparchive ${CMAKE_BINARY_DIR}/libziparchive)
           endif()
           
           # Build androidfw from source (Android framework library)
