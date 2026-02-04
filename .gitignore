@@ -15,6 +15,7 @@ aapt2_64
 
 # Cloned Android source
 frameworks-base/
+system-core/
 android-build/
 
 # CMake

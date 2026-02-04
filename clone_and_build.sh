@@ -6,6 +6,7 @@ set -e
 # Tag: android-16.0.0_r4
 
 REPO_URL="https://android.googlesource.com/platform/frameworks/base"
+SYSTEM_CORE_URL="https://android.googlesource.com/platform/system/core"
 TAG="android-16.0.0_r4"
 WORK_DIR=$(pwd)
 
@@ -19,7 +20,7 @@ echo "==================================="
 
 # Function to clone with sparse checkout
 clone_sparse() {
-    echo "Step 1: Initializing repository..."
+    echo "Step 1: Initializing frameworks-base repository..."
     if [ -d "frameworks-base" ]; then
         echo "Removing existing frameworks-base directory..."
         rm -rf frameworks-base
@@ -31,7 +32,7 @@ clone_sparse() {
     git init
     git remote add origin $REPO_URL
     
-    echo "Step 2: Configuring sparse checkout..."
+    echo "Step 2: Configuring sparse checkout for frameworks-base..."
     git config core.sparseCheckout true
     
     # Define sparse checkout paths for AAPT2
@@ -53,13 +54,44 @@ Android.mk
 /tools/aapt2/proto/
 EOF
     
-    echo "Step 3: Fetching refs/tags/$TAG (this may take a while)..."
+    echo "Step 3: Fetching refs/tags/$TAG from frameworks-base (this may take a while)..."
     git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
     
     echo "Step 4: Checking out tag $TAG..."
     git checkout $TAG
     
-    echo "Clone completed successfully!"
+    echo "frameworks-base clone completed successfully!"
+    cd "$WORK_DIR"
+    
+    echo ""
+    echo "Step 5: Initializing system-core repository..."
+    if [ -d "system-core" ]; then
+        echo "Removing existing system-core directory..."
+        rm -rf system-core
+    fi
+    
+    mkdir -p system-core
+    cd system-core
+    
+    git init
+    git remote add origin $SYSTEM_CORE_URL
+    
+    echo "Step 6: Configuring sparse checkout for system-core..."
+    git config core.sparseCheckout true
+    
+    # Define sparse checkout paths for android-base headers
+    cat > .git/info/sparse-checkout << EOF
+# Android base library headers
+/base/include/
+EOF
+    
+    echo "Step 7: Fetching refs/tags/$TAG from system-core (this may take a while)..."
+    git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
+    
+    echo "Step 8: Checking out tag $TAG..."
+    git checkout $TAG
+    
+    echo "system-core clone completed successfully!"
     cd "$WORK_DIR"
 }
 
@@ -149,6 +181,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/../frameworks-base/tools/aapt2/include
     ${CMAKE_SOURCE_DIR}/../frameworks-base/libs/androidfw/include
     ${CMAKE_SOURCE_DIR}/../frameworks-base/include
+    ${CMAKE_SOURCE_DIR}/../system-core/base/include
     ${PROTOBUF_INCLUDE_DIRS}
 )
 
