@@ -78,6 +78,8 @@ jobs:
           git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/libbase libbase
           
           git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/base base
+          
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/native native
 
           git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/libpng libpng
 
@@ -118,12 +120,16 @@ jobs:
           
           # Include directories
           include_directories(
-              ${CMAKE_SOURCE_DIR}/../boringssl
-              ${CMAKE_SOURCE_DIR}/../fmtlib
-              ${CMAKE_SOURCE_DIR}/../pcre
-              ${CMAKE_SOURCE_DIR}/../expat
-              ${CMAKE_SOURCE_DIR}/../pzopfli
-              ${CMAKE_SOURCE_DIR}/../protobuf/cmake
+              ${CMAKE_SOURCE_DIR}/../base/tools/aapt2
+              ${CMAKE_SOURCE_DIR}/../base/tools/aapt2/include
+              ${CMAKE_SOURCE_DIR}/../base/libs/androidfw/include
+              ${CMAKE_SOURCE_DIR}/../base/include
+              ${CMAKE_SOURCE_DIR}/../native/include
+              ${CMAKE_SOURCE_DIR}/../libbase/include
+              ${CMAKE_SOURCE_DIR}/../core/libutils/include
+              ${CMAKE_SOURCE_DIR}/../core/include
+              ${CMAKE_SOURCE_DIR}/../incremental_delivery/incfs/util/include
+              ${CMAKE_SOURCE_DIR}/../logging/liblog/include
               ${PROTOBUF_INCLUDE_DIRS}
           )
           
@@ -303,6 +309,14 @@ jobs:
           # Clone system/core for utils headers
           echo "Cloning system/core for utils headers..."
           git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/core platform/system/core
+          
+          # Clone system/incremental_delivery for util/map_ptr.h
+          echo "Cloning system/incremental_delivery for incfs headers..."
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/incremental_delivery platform/system/incremental_delivery
+          
+          # Clone system/logging for logging headers
+          echo "Cloning system/logging for logging headers..."
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/logging platform/system/logging
       
       - name: Generate build files
         run: |
@@ -334,6 +348,8 @@ jobs:
               ${CMAKE_SOURCE_DIR}/../platform/system/libbase/include
               ${CMAKE_SOURCE_DIR}/../platform/system/core/libutils/include
               ${CMAKE_SOURCE_DIR}/../platform/system/core/include
+              ${CMAKE_SOURCE_DIR}/../platform/system/incremental_delivery/incfs/util/include
+              ${CMAKE_SOURCE_DIR}/../platform/system/logging/liblog/include
               ${PROTOBUF_INCLUDE_DIRS}
           )
           
