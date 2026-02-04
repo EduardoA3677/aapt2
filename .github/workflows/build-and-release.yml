@@ -78,6 +78,8 @@ jobs:
           git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/libbase libbase
           
           git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/base base
+          
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/native native
 
           git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/libpng libpng
 
@@ -118,12 +120,16 @@ jobs:
           
           # Include directories
           include_directories(
-              ${CMAKE_SOURCE_DIR}/../boringssl
-              ${CMAKE_SOURCE_DIR}/../fmtlib
-              ${CMAKE_SOURCE_DIR}/../pcre
-              ${CMAKE_SOURCE_DIR}/../expat
-              ${CMAKE_SOURCE_DIR}/../pzopfli
-              ${CMAKE_SOURCE_DIR}/../protobuf/cmake
+              ${CMAKE_SOURCE_DIR}/../base/tools/aapt2
+              ${CMAKE_SOURCE_DIR}/../base/tools/aapt2/include
+              ${CMAKE_SOURCE_DIR}/../base/libs/androidfw/include
+              ${CMAKE_SOURCE_DIR}/../base/include
+              ${CMAKE_SOURCE_DIR}/../native/include
+              ${CMAKE_SOURCE_DIR}/../libbase/include
+              ${CMAKE_SOURCE_DIR}/../core/libutils/include
+              ${CMAKE_SOURCE_DIR}/../core/include
+              ${CMAKE_SOURCE_DIR}/../incremental_delivery/incfs/util/include
+              ${CMAKE_SOURCE_DIR}/../logging/liblog/include
               ${PROTOBUF_INCLUDE_DIRS}
           )
           
@@ -192,8 +198,7 @@ jobs:
       
       - name: Build AAPT2 binaries
         run: |
-          cd src
-          cd build
+          cd src/build
           cmake -G "Unix Makefiles" .
           make -j$(nproc) VERBOSE=1 || true
           
@@ -202,8 +207,7 @@ jobs:
       
       - name: Strip binaries
         run: |
-          cd src
-          cd build
+          cd src/build
           for binary in aapt2 aapt2_64 aapt aapt_64; do
             if [ -f "$binary" ]; then
               strip "$binary"
@@ -213,8 +217,7 @@ jobs:
       
       - name: Verify binaries
         run: |
-          cd src
-          cd build
+          cd src/build
           chmod +x verify_build.sh 2>/dev/null || true
           
           echo "Listing built binaries:"
@@ -233,9 +236,8 @@ jobs:
       
       - name: Package binaries
         run: |
-          cd src
-          mkdir -p release/linux
-          cd build
+          mkdir -p src/release/linux
+          cd src/build
           
           # Copy available binaries
           for binary in aapt2 aapt2_64 aapt aapt_64; do
@@ -266,216 +268,9 @@ jobs:
           rm -rf build
           df -h
   
-  build-macos:
-    name: Build AAPT2 on macOS
-    runs-on: macos-latest
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Install build dependencies
-        run: |
-          brew install \
-            cmake \
-            ninja \
-            pkg-config \
-            protobuf \
-            libpng \
-            expat
-      
-      - name: Verify dependencies
-        run: |
-          echo "Checking installed dependencies..."
-          cmake --version
-          clang++ --version
-          protoc --version
-          pkg-config --version
-      
-      - name: Clone Android source (sparse checkout)
-        run: |
-          echo "Cloning frameworks/base with sparse checkout..."
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/base platform/frameworks/base
-
-          echo "Cloning frameworks/native with sparse checkout..."
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/native platform/frameworks/native
-          
-          # Clone system/libbase for android-base headers
-          echo "Cloning system/libbase for android-base headers..."
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/libbase platform/system/libbase
-             
-          # Clone system/core for utils headers
-          echo "Cloning system/core for utils headers..."
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/core platform/system/core
-      
-      - name: Generate build files
-        run: |
-          mkdir -p build
-          cd build
-          
-          # Create CMakeLists.txt (same as Linux)
-          cat > CMakeLists.txt << 'EOF'
-          cmake_minimum_required(VERSION 3.10)
-          project(aapt2)
-          
-          set(CMAKE_CXX_STANDARD 17)
-          set(CMAKE_CXX_STANDARD_REQUIRED ON)
-          set(CMAKE_BUILD_TYPE Release)
-          
-          # Find required packages
-          find_package(Protobuf REQUIRED)
-          find_package(ZLIB REQUIRED)
-          find_package(PNG REQUIRED)
-          find_package(EXPAT REQUIRED)
-          
-          # Include directories
-          include_directories(
-              ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/tools/aapt2
-              ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/tools/aapt2/include
-              ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/libs/androidfw/include
-              ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/include
-              ${CMAKE_SOURCE_DIR}/../platform/frameworks/native/include
-              ${CMAKE_SOURCE_DIR}/../platform/system/libbase/include
-              ${CMAKE_SOURCE_DIR}/../platform/system/core/libutils/include
-              ${CMAKE_SOURCE_DIR}/../platform/system/core/include
-              ${PROTOBUF_INCLUDE_DIRS}
-          )
-          
-          # Collect AAPT2 source files
-          file(GLOB_RECURSE AAPT2_SOURCES 
-              "${CMAKE_SOURCE_DIR}/../platform/frameworks/base/tools/aapt2/*.cpp"
-          )
-          
-          # Remove test files
-          list(FILTER AAPT2_SOURCES EXCLUDE REGEX ".*_test\\.cpp$")
-          list(FILTER AAPT2_SOURCES EXCLUDE REGEX ".*/tests/.*")
-          
-          # Build AAPT2 executable
-          if(AAPT2_SOURCES)
-              add_executable(aapt2 ${AAPT2_SOURCES})
-              target_link_libraries(aapt2 
-                  ${PROTOBUF_LIBRARIES}
-                  ${ZLIB_LIBRARIES}
-                  PNG::PNG
-                  ${EXPAT_LIBRARIES}
-                  pthread
-              )
-              
-              # Build 64-bit version
-              add_executable(aapt2_64 ${AAPT2_SOURCES})
-              target_link_libraries(aapt2_64 
-                  ${PROTOBUF_LIBRARIES}
-                  ${ZLIB_LIBRARIES}
-                  PNG::PNG
-                  ${EXPAT_LIBRARIES}
-                  pthread
-              )
-          endif()
-          
-          # Collect AAPT source files
-          file(GLOB_RECURSE AAPT_SOURCES 
-              "${CMAKE_SOURCE_DIR}/../platform/frameworks/base/tools/aapt/*.cpp"
-          )
-          
-          # Remove test files
-          list(FILTER AAPT_SOURCES EXCLUDE REGEX ".*_test\\.cpp$")
-          list(FILTER AAPT_SOURCES EXCLUDE REGEX ".*/tests/.*")
-          
-          # Build AAPT executable
-          if(AAPT_SOURCES)
-              add_executable(aapt ${AAPT_SOURCES})
-              target_link_libraries(aapt 
-                  ${ZLIB_LIBRARIES}
-                  PNG::PNG
-                  ${EXPAT_LIBRARIES}
-                  pthread
-              )
-              
-              # Build 64-bit version
-              add_executable(aapt_64 ${AAPT_SOURCES})
-              target_link_libraries(aapt_64 
-                  ${ZLIB_LIBRARIES}
-                  PNG::PNG
-                  ${EXPAT_LIBRARIES}
-                  pthread
-              )
-          endif()
-          EOF
-      
-      - name: Build AAPT2 binaries
-        run: |
-          cd build
-          cmake -G "Unix Makefiles" .
-          make -j$(sysctl -n hw.ncpu) VERBOSE=1 || true
-          
-          echo "Build completed. Checking for binaries..."
-          ls -lh || true
-      
-      - name: Strip binaries
-        run: |
-          cd build
-          for binary in aapt2 aapt2_64 aapt aapt_64; do
-            if [ -f "$binary" ]; then
-              strip "$binary"
-              echo "Stripped $binary"
-            fi
-          done
-      
-      - name: Verify binaries
-        run: |
-          cd build
-          
-          echo "Listing built binaries:"
-          ls -lh aapt* 2>/dev/null || echo "Warning: Some binaries may not be available"
-          
-          echo "Testing binaries:"
-          for binary in aapt2 aapt2_64 aapt aapt_64; do
-            if [ -f "$binary" ]; then
-              echo "Testing $binary..."
-              ./"$binary" version || echo "$binary version check failed (may be expected)"
-              file "$binary"
-            else
-              echo "Warning: $binary not found"
-            fi
-          done
-      
-      - name: Package binaries
-        run: |
-          mkdir -p release/macos
-          cd build
-          
-          # Copy available binaries
-          for binary in aapt2 aapt2_64 aapt aapt_64; do
-            if [ -f "$binary" ]; then
-              cp "$binary" ../release/macos/
-              echo "Packaged $binary"
-            fi
-          done
-          
-          cd ../release/macos
-          tar -czf ../aapt2-macos-x64.tar.gz *
-          cd ../..
-          ls -lh release/
-      
-      - name: Upload macOS artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: aapt2-macos-binaries
-          path: release/aapt2-macos-x64.tar.gz
-          retention-days: 7
-      
-      - name: Cleanup build files
-        if: always()
-        run: |
-          echo "Cleaning up build files..."
-          rm -rf frameworks-base
-          rm -rf system-core
-          rm -rf build
-          df -h
-  
   create-release:
     name: Create GitHub Release
-    needs: [build-linux, build-macos]
+    needs: [build-linux]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     
@@ -487,12 +282,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: aapt2-linux-binaries
-          path: ./artifacts
-      
-      - name: Download macOS artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: aapt2-macos-binaries
           path: ./artifacts
       
       - name: List artifacts
@@ -528,7 +317,6 @@ jobs:
           ## Platforms
           
           - **Linux**: x86_64 (Ubuntu 20.04+, Debian 10+, etc.)
-          - **macOS**: x86_64 (macOS 11+)
           
           ## Installation
           
@@ -537,19 +325,6 @@ jobs:
           # Download and extract
           wget https://github.com/${{ github.repository }}/releases/download/${{ steps.get_tag.outputs.tag }}/aapt2-linux-x64.tar.gz
           tar -xzf aapt2-linux-x64.tar.gz
-          
-          # Install to system
-          sudo install -m 755 aapt2 /usr/local/bin/
-          sudo install -m 755 aapt2_64 /usr/local/bin/
-          sudo install -m 755 aapt /usr/local/bin/
-          sudo install -m 755 aapt_64 /usr/local/bin/
-          ```
-          
-          ### macOS
-          ```bash
-          # Download and extract
-          wget https://github.com/${{ github.repository }}/releases/download/${{ steps.get_tag.outputs.tag }}/aapt2-macos-x64.tar.gz
-          tar -xzf aapt2-macos-x64.tar.gz
           
           # Install to system
           sudo install -m 755 aapt2 /usr/local/bin/
@@ -582,14 +357,14 @@ jobs:
           
           - Built on: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
           - Build system: GitHub Actions
-          - Compiler: GCC (Linux), Clang (macOS)
+          - Compiler: GCC (Linux)
           - Build type: Release (optimized, stripped)
           
           ## Notes
           
           - Binaries are stripped for smaller size
           - All binaries are statically linked where possible
-          - Tested on Ubuntu 22.04 (Linux) and macOS 13 (macOS)
+          - Tested on Ubuntu 22.04 (Linux)
           
           ## Support
           
@@ -611,7 +386,6 @@ jobs:
           prerelease: false
           files: |
             artifacts/aapt2-linux-x64.tar.gz
-            artifacts/aapt2-macos-x64.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
