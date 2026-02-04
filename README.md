@@ -5,7 +5,12 @@ Este repositorio contiene scripts y configuración para clonar y compilar los bi
 ## Descripción
 
 Este proyecto clona únicamente los archivos y carpetas necesarios de:
-- **Repositorio**: https://android.googlesource.com/platform/frameworks/base
+- **Repositorio frameworks/base**: https://android.googlesource.com/platform/frameworks/base
+- **Repositorio system/libbase**: https://android.googlesource.com/platform/system/libbase
+- **Repositorio system/core**: https://android.googlesource.com/platform/system/core
+- **Repositorio frameworks/native**: https://android.googlesource.com/platform/frameworks/native
+- **Repositorio system/incremental_delivery**: https://android.googlesource.com/platform/system/incremental_delivery
+- **Repositorio system/logging**: https://android.googlesource.com/platform/system/logging
 - **Tag**: android-16.0.0_r4
 
 Y compila los siguientes binarios:
@@ -126,6 +131,16 @@ aapt2/
 │   ├── tools/aapt2/        # Fuentes de AAPT2
 │   ├── tools/aapt/         # Fuentes de AAPT
 │   └── libs/androidfw/     # Bibliotecas de Android Framework
+├── libbase/                 # Código fuente de libbase (creado después de clonar)
+│   └── include/android-base/ # Android base library headers
+├── system-core/             # Código fuente de system-core (creado después de clonar)
+│   └── libutils/include/   # Android utils headers
+├── native/                  # Código fuente de frameworks-native (creado después de clonar)
+│   └── include/            # Native framework headers
+├── incfs/                   # Código fuente de incremental_delivery (creado después de clonar)
+│   └── incfs/util/include/ # INCFS utility headers
+├── liblog/                  # Código fuente de system-logging (creado después de clonar)
+│   └── liblog/include/     # Android logging headers
 └── build/                   # Directorio de compilación (creado durante build)
     ├── aapt2               # Binario AAPT2
     ├── aapt2_64            # Binario AAPT2 64-bit
@@ -152,6 +167,7 @@ Una vez compilados, los binarios se encuentran en el directorio `build/`:
 
 El script `clone_and_build.sh` utiliza sparse checkout de Git para clonar únicamente los archivos necesarios:
 
+**De frameworks/base:**
 ```
 /tools/aapt2/          # Código fuente de AAPT2
 /tools/aapt/           # Código fuente de AAPT
@@ -159,6 +175,32 @@ El script `clone_and_build.sh` utiliza sparse checkout de Git para clonar única
 /include/androidfw/    # Headers
 Android.bp             # Archivos de build
 Android.mk
+```
+
+**De system/libbase:**
+```
+/include/              # Android base library headers (android-base/*)
+```
+
+**De system/core:**
+```
+/libutils/include/     # Android utils headers
+/include/              # System headers
+```
+
+**De frameworks/native:**
+```
+/include/              # Native framework headers
+```
+
+**De system/incremental_delivery:**
+```
+/incfs/util/include/   # INCFS utility headers
+```
+
+**De system/logging:**
+```
+/liblog/include/       # Android logging headers
 ```
 
 Esto reduce significativamente el tamaño de descarga comparado con clonar todo el repositorio frameworks/base.

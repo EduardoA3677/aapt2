@@ -6,6 +6,11 @@ set -e
 # Tag: android-16.0.0_r4
 
 REPO_URL="https://android.googlesource.com/platform/frameworks/base"
+LIBBASE_URL="https://android.googlesource.com/platform/system/libbase"
+SYSTEM_CORE_URL="https://android.googlesource.com/platform/system/core"
+NATIVE_URL="https://android.googlesource.com/platform/frameworks/native"
+INCFS_URL="https://android.googlesource.com/platform/system/incremental_delivery"
+LIBLOG_URL="https://android.googlesource.com/platform/system/logging"
 TAG="android-16.0.0_r4"
 WORK_DIR=$(pwd)
 
@@ -19,7 +24,7 @@ echo "==================================="
 
 # Function to clone with sparse checkout
 clone_sparse() {
-    echo "Step 1: Initializing repository..."
+    echo "Step 1: Initializing frameworks-base repository..."
     if [ -d "frameworks-base" ]; then
         echo "Removing existing frameworks-base directory..."
         rm -rf frameworks-base
@@ -31,7 +36,7 @@ clone_sparse() {
     git init
     git remote add origin $REPO_URL
     
-    echo "Step 2: Configuring sparse checkout..."
+    echo "Step 2: Configuring sparse checkout for frameworks-base..."
     git config core.sparseCheckout true
     
     # Define sparse checkout paths for AAPT2
@@ -48,18 +53,175 @@ Android.mk
 /libs/androidfw/
 /include/androidfw/
 /core/res/
+/native/android/
 
 # Proto definitions if needed
 /tools/aapt2/proto/
 EOF
     
-    echo "Step 3: Fetching refs/tags/$TAG (this may take a while)..."
+    echo "Step 3: Fetching refs/tags/$TAG from frameworks-base (this may take a while)..."
     git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
     
     echo "Step 4: Checking out tag $TAG..."
     git checkout $TAG
     
-    echo "Clone completed successfully!"
+    echo "frameworks-base clone completed successfully!"
+    cd "$WORK_DIR"
+    
+    echo ""
+    echo "Step 5: Initializing libbase repository..."
+    if [ -d "libbase" ]; then
+        echo "Removing existing libbase directory..."
+        rm -rf libbase
+    fi
+    
+    mkdir -p libbase
+    cd libbase
+    
+    git init
+    git remote add origin $LIBBASE_URL
+    
+    echo "Step 6: Configuring sparse checkout for libbase..."
+    git config core.sparseCheckout true
+    
+    # Define sparse checkout paths for android-base headers
+    cat > .git/info/sparse-checkout << EOF
+# Android base library headers
+/include/
+EOF
+    
+    echo "Step 7: Fetching refs/tags/$TAG from libbase (this may take a while)..."
+    git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
+    
+    echo "Step 8: Checking out tag $TAG..."
+    git checkout $TAG
+    
+    echo "libbase clone completed successfully!"
+    cd "$WORK_DIR"
+    
+    echo ""
+    echo "Step 9: Initializing system-core repository..."
+    if [ -d "system-core" ]; then
+        echo "Removing existing system-core directory..."
+        rm -rf system-core
+    fi
+    
+    mkdir -p system-core
+    cd system-core
+    
+    git init
+    git remote add origin $SYSTEM_CORE_URL
+    
+    echo "Step 10: Configuring sparse checkout for system-core..."
+    git config core.sparseCheckout true
+    
+    # Define sparse checkout paths for libutils headers
+    cat > .git/info/sparse-checkout << EOF
+# libutils headers
+/libutils/
+/include/
+EOF
+    
+    echo "Step 11: Fetching refs/tags/$TAG from system-core (this may take a while)..."
+    git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
+    
+    echo "Step 12: Checking out tag $TAG..."
+    git checkout $TAG
+    
+    echo "system-core clone completed successfully!"
+    cd "$WORK_DIR"
+    
+    echo ""
+    echo "Step 13: Initializing frameworks-native repository..."
+    if [ -d "native" ]; then
+        echo "Removing existing native directory..."
+        rm -rf native
+    fi
+    
+    mkdir -p native
+    cd native
+    
+    git init
+    git remote add origin $NATIVE_URL
+    
+    echo "Step 14: Configuring sparse checkout for frameworks-native..."
+    git config core.sparseCheckout true
+    
+    # Define sparse checkout paths for native headers
+    cat > .git/info/sparse-checkout << EOF
+# Native headers
+/include/
+EOF
+    
+    echo "Step 15: Fetching refs/tags/$TAG from frameworks-native (this may take a while)..."
+    git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
+    
+    echo "Step 16: Checking out tag $TAG..."
+    git checkout $TAG
+    
+    echo "frameworks-native clone completed successfully!"
+    cd "$WORK_DIR"
+    
+    echo ""
+    echo "Step 17: Initializing incremental_delivery repository..."
+    if [ -d "incfs" ]; then
+        echo "Removing existing incfs directory..."
+        rm -rf incfs
+    fi
+    
+    mkdir -p incfs
+    cd incfs
+    
+    git init
+    git remote add origin $INCFS_URL
+    
+    echo "Step 18: Configuring sparse checkout for incremental_delivery..."
+    git config core.sparseCheckout true
+    
+    # Define sparse checkout paths for incfs util headers
+    cat > .git/info/sparse-checkout << EOF
+# INCFS util headers
+/incfs/util/include/
+EOF
+    
+    echo "Step 19: Fetching refs/tags/$TAG from incremental_delivery (this may take a while)..."
+    git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
+    
+    echo "Step 20: Checking out tag $TAG..."
+    git checkout $TAG
+    
+    echo "incremental_delivery clone completed successfully!"
+    cd "$WORK_DIR"
+    
+    echo ""
+    echo "Step 21: Initializing system-logging repository..."
+    if [ -d "liblog" ]; then
+        echo "Removing existing liblog directory..."
+        rm -rf liblog
+    fi
+    
+    mkdir -p liblog
+    cd liblog
+    
+    git init
+    git remote add origin $LIBLOG_URL
+    
+    echo "Step 22: Configuring sparse checkout for system-logging..."
+    git config core.sparseCheckout true
+    
+    # Define sparse checkout paths for liblog headers
+    cat > .git/info/sparse-checkout << EOF
+# liblog headers
+/liblog/include/
+EOF
+    
+    echo "Step 23: Fetching refs/tags/$TAG from system-logging (this may take a while)..."
+    git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
+    
+    echo "Step 24: Checking out tag $TAG..."
+    git checkout $TAG
+    
+    echo "system-logging clone completed successfully!"
     cd "$WORK_DIR"
 }
 
@@ -97,6 +259,10 @@ check_dependencies() {
         MISSING_DEPS+=("libprotobuf-dev")
     fi
     
+    if ! ldconfig -p | grep -q libfmt.so; then
+        MISSING_DEPS+=("libfmt-dev")
+    fi
+    
     if [ ${#MISSING_DEPS[@]} -ne 0 ]; then
         echo "ERROR: Missing dependencies: ${MISSING_DEPS[*]}"
         echo ""
@@ -105,7 +271,7 @@ check_dependencies() {
         echo "sudo apt-get install -y ${MISSING_DEPS[*]} build-essential pkg-config libexpat1-dev libpng-dev"
         echo ""
         echo "On macOS, install with:"
-        echo "brew install ${MISSING_DEPS[*]} expat libpng"
+        echo "brew install ${MISSING_DEPS[*]} expat libpng fmt"
         return 1
     fi
     
@@ -149,6 +315,12 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/../frameworks-base/tools/aapt2/include
     ${CMAKE_SOURCE_DIR}/../frameworks-base/libs/androidfw/include
     ${CMAKE_SOURCE_DIR}/../frameworks-base/include
+    ${CMAKE_SOURCE_DIR}/../libbase/include
+    ${CMAKE_SOURCE_DIR}/../system-core/libutils/include
+    ${CMAKE_SOURCE_DIR}/../system-core/include
+    ${CMAKE_SOURCE_DIR}/../native/include
+    ${CMAKE_SOURCE_DIR}/../incfs/incfs/util/include
+    ${CMAKE_SOURCE_DIR}/../liblog/liblog/include
     ${PROTOBUF_INCLUDE_DIRS}
 )
 
