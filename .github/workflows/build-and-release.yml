@@ -275,77 +275,18 @@ jobs:
       - name: Clone Android source (sparse checkout)
         run: |
           echo "Cloning frameworks/base with sparse checkout..."
-          mkdir -p frameworks-base
-          cd frameworks-base
-          git init
-          git remote add origin https://android.googlesource.com/platform/frameworks/base
-          git config core.sparseCheckout true
-          
-          # Configure sparse checkout paths
-          cat > .git/info/sparse-checkout << 'EOF'
-          /tools/aapt2/
-          /tools/aapt/
-          Android.bp
-          Android.mk
-          /libs/androidfw/
-          /include/androidfw/
-          EOF
-          
-          # Fetch and checkout the tag
-          echo "Fetching refs/tags/android-16.0.0_r4..."
-          git fetch --depth 1 origin refs/tags/android-16.0.0_r4:refs/tags/android-16.0.0_r4
-          git checkout android-16.0.0_r4
-          
-          echo "Source cloned successfully"
-          ls -la tools/
-          
-          cd ..
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/base platform/frameworks/base
+
+          echo "Cloning frameworks/native with sparse checkout..."
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/native platform/frameworks/native
           
           # Clone system/libbase for android-base headers
           echo "Cloning system/libbase for android-base headers..."
-          mkdir -p libbase
-          cd libbase
-          git init
-          git remote add origin https://android.googlesource.com/platform/system/libbase
-          git config core.sparseCheckout true
-          
-          # Configure sparse checkout for android-base headers
-          cat > .git/info/sparse-checkout << 'EOF'
-          /include/
-          EOF
-          
-          # Fetch and checkout the tag
-          echo "Fetching refs/tags/android-16.0.0_r4..."
-          git fetch --depth 1 origin refs/tags/android-16.0.0_r4:refs/tags/android-16.0.0_r4
-          git checkout android-16.0.0_r4
-          
-          echo "android-base headers cloned successfully"
-          ls -la include/android-base/ || echo "Note: include structure may differ"
-          
-          cd ..
-          
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/libbase platform/system/libbase
+             
           # Clone system/core for utils headers
           echo "Cloning system/core for utils headers..."
-          mkdir -p system-core
-          cd system-core
-          git init
-          git remote add origin https://android.googlesource.com/platform/system/core
-          git config core.sparseCheckout true
-          
-          # Configure sparse checkout for libutils headers
-          cat > .git/info/sparse-checkout << 'EOF'
-          /libutils/include/
-          /include/
-          EOF
-          
-          # Fetch and checkout the tag
-          echo "Fetching refs/tags/android-16.0.0_r4..."
-          git fetch --depth 1 origin refs/tags/android-16.0.0_r4:refs/tags/android-16.0.0_r4
-          git checkout android-16.0.0_r4
-          
-          echo "system-core headers cloned successfully"
-          ls -la libutils/include/ || echo "Note: libutils/include structure may differ"
-          ls -la include/ || echo "Note: include structure may differ"
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/core platform/system/core
       
       - name: Generate build files
         run: |
@@ -369,19 +310,20 @@ jobs:
           
           # Include directories
           include_directories(
-              ${CMAKE_SOURCE_DIR}/../frameworks-base/tools/aapt2
-              ${CMAKE_SOURCE_DIR}/../frameworks-base/tools/aapt2/include
-              ${CMAKE_SOURCE_DIR}/../frameworks-base/libs/androidfw/include
-              ${CMAKE_SOURCE_DIR}/../frameworks-base/include
-              ${CMAKE_SOURCE_DIR}/../libbase/include
-              ${CMAKE_SOURCE_DIR}/../system-core/libutils/include
-              ${CMAKE_SOURCE_DIR}/../system-core/include
+              ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/tools/aapt2
+              ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/tools/aapt2/include
+              ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/libs/androidfw/include
+              ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/include
+              ${CMAKE_SOURCE_DIR}/../platform/frameworks/native/include
+              ${CMAKE_SOURCE_DIR}/../platform/system/libbase/include
+              ${CMAKE_SOURCE_DIR}/../platform/system/core/libutils/include
+              ${CMAKE_SOURCE_DIR}/../platform/system/core/include
               ${PROTOBUF_INCLUDE_DIRS}
           )
           
           # Collect AAPT2 source files
           file(GLOB_RECURSE AAPT2_SOURCES 
-              "${CMAKE_SOURCE_DIR}/../frameworks-base/tools/aapt2/*.cpp"
+              "${CMAKE_SOURCE_DIR}/../platform/frameworks/base/tools/aapt2/*.cpp"
           )
           
           # Remove test files
@@ -412,7 +354,7 @@ jobs:
           
           # Collect AAPT source files
           file(GLOB_RECURSE AAPT_SOURCES 
-              "${CMAKE_SOURCE_DIR}/../frameworks-base/tools/aapt/*.cpp"
+              "${CMAKE_SOURCE_DIR}/../platform/frameworks/base/tools/aapt/*.cpp"
           )
           
           # Remove test files
