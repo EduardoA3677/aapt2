@@ -192,6 +192,7 @@ jobs:
       
       - name: Build AAPT2 binaries
         run: |
+          cd src
           cd build
           cmake -G "Unix Makefiles" .
           make -j$(nproc) VERBOSE=1 || true
@@ -201,6 +202,7 @@ jobs:
       
       - name: Strip binaries
         run: |
+          cd src
           cd build
           for binary in aapt2 aapt2_64 aapt aapt_64; do
             if [ -f "$binary" ]; then
@@ -211,6 +213,7 @@ jobs:
       
       - name: Verify binaries
         run: |
+          cd src
           cd build
           chmod +x verify_build.sh 2>/dev/null || true
           
@@ -230,6 +233,7 @@ jobs:
       
       - name: Package binaries
         run: |
+          cd src
           mkdir -p release/linux
           cd build
           
@@ -250,7 +254,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: aapt2-linux-binaries
-          path: release/aapt2-linux-x64.tar.gz
+          path: src/release/aapt2-linux-x64.tar.gz
           retention-days: 7
       
       - name: Cleanup build files
