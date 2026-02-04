@@ -7,6 +7,9 @@ set -e
 
 REPO_URL="https://android.googlesource.com/platform/frameworks/base"
 LIBBASE_URL="https://android.googlesource.com/platform/system/libbase"
+SYSTEM_CORE_URL="https://android.googlesource.com/platform/system/core"
+NATIVE_URL="https://android.googlesource.com/platform/frameworks/native"
+INCFS_URL="https://android.googlesource.com/platform/system/incremental_delivery"
 TAG="android-16.0.0_r4"
 WORK_DIR=$(pwd)
 
@@ -49,6 +52,7 @@ Android.mk
 /libs/androidfw/
 /include/androidfw/
 /core/res/
+/native/android/
 
 # Proto definitions if needed
 /tools/aapt2/proto/
@@ -92,6 +96,100 @@ EOF
     git checkout $TAG
     
     echo "libbase clone completed successfully!"
+    cd "$WORK_DIR"
+    
+    echo ""
+    echo "Step 9: Initializing system-core repository..."
+    if [ -d "system-core" ]; then
+        echo "Removing existing system-core directory..."
+        rm -rf system-core
+    fi
+    
+    mkdir -p system-core
+    cd system-core
+    
+    git init
+    git remote add origin $SYSTEM_CORE_URL
+    
+    echo "Step 10: Configuring sparse checkout for system-core..."
+    git config core.sparseCheckout true
+    
+    # Define sparse checkout paths for libutils headers
+    cat > .git/info/sparse-checkout << EOF
+# libutils headers
+/libutils/include/
+/include/
+EOF
+    
+    echo "Step 11: Fetching refs/tags/$TAG from system-core (this may take a while)..."
+    git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
+    
+    echo "Step 12: Checking out tag $TAG..."
+    git checkout $TAG
+    
+    echo "system-core clone completed successfully!"
+    cd "$WORK_DIR"
+    
+    echo ""
+    echo "Step 13: Initializing frameworks-native repository..."
+    if [ -d "native" ]; then
+        echo "Removing existing native directory..."
+        rm -rf native
+    fi
+    
+    mkdir -p native
+    cd native
+    
+    git init
+    git remote add origin $NATIVE_URL
+    
+    echo "Step 14: Configuring sparse checkout for frameworks-native..."
+    git config core.sparseCheckout true
+    
+    # Define sparse checkout paths for native headers
+    cat > .git/info/sparse-checkout << EOF
+# Native headers
+/include/
+EOF
+    
+    echo "Step 15: Fetching refs/tags/$TAG from frameworks-native (this may take a while)..."
+    git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
+    
+    echo "Step 16: Checking out tag $TAG..."
+    git checkout $TAG
+    
+    echo "frameworks-native clone completed successfully!"
+    cd "$WORK_DIR"
+    
+    echo ""
+    echo "Step 17: Initializing incremental_delivery repository..."
+    if [ -d "incfs" ]; then
+        echo "Removing existing incfs directory..."
+        rm -rf incfs
+    fi
+    
+    mkdir -p incfs
+    cd incfs
+    
+    git init
+    git remote add origin $INCFS_URL
+    
+    echo "Step 18: Configuring sparse checkout for incremental_delivery..."
+    git config core.sparseCheckout true
+    
+    # Define sparse checkout paths for incfs util headers
+    cat > .git/info/sparse-checkout << EOF
+# INCFS util headers
+/incfs/util/include/
+EOF
+    
+    echo "Step 19: Fetching refs/tags/$TAG from incremental_delivery (this may take a while)..."
+    git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
+    
+    echo "Step 20: Checking out tag $TAG..."
+    git checkout $TAG
+    
+    echo "incremental_delivery clone completed successfully!"
     cd "$WORK_DIR"
 }
 
@@ -182,6 +280,10 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/../frameworks-base/libs/androidfw/include
     ${CMAKE_SOURCE_DIR}/../frameworks-base/include
     ${CMAKE_SOURCE_DIR}/../libbase/include
+    ${CMAKE_SOURCE_DIR}/../system-core/libutils/include
+    ${CMAKE_SOURCE_DIR}/../system-core/include
+    ${CMAKE_SOURCE_DIR}/../native/include
+    ${CMAKE_SOURCE_DIR}/../incfs/incfs/util/include
     ${PROTOBUF_INCLUDE_DIRS}
 )
 

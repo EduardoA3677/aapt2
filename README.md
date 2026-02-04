@@ -7,6 +7,9 @@ Este repositorio contiene scripts y configuración para clonar y compilar los bi
 Este proyecto clona únicamente los archivos y carpetas necesarios de:
 - **Repositorio frameworks/base**: https://android.googlesource.com/platform/frameworks/base
 - **Repositorio system/libbase**: https://android.googlesource.com/platform/system/libbase
+- **Repositorio system/core**: https://android.googlesource.com/platform/system/core
+- **Repositorio frameworks/native**: https://android.googlesource.com/platform/frameworks/native
+- **Repositorio system/incremental_delivery**: https://android.googlesource.com/platform/system/incremental_delivery
 - **Tag**: android-16.0.0_r4
 
 Y compila los siguientes binarios:
@@ -129,6 +132,12 @@ aapt2/
 │   └── libs/androidfw/     # Bibliotecas de Android Framework
 ├── libbase/                 # Código fuente de libbase (creado después de clonar)
 │   └── include/android-base/ # Android base library headers
+├── system-core/             # Código fuente de system-core (creado después de clonar)
+│   └── libutils/include/   # Android utils headers
+├── native/                  # Código fuente de frameworks-native (creado después de clonar)
+│   └── include/            # Native framework headers
+├── incfs/                   # Código fuente de incremental_delivery (creado después de clonar)
+│   └── incfs/util/include/ # INCFS utility headers
 └── build/                   # Directorio de compilación (creado durante build)
     ├── aapt2               # Binario AAPT2
     ├── aapt2_64            # Binario AAPT2 64-bit
@@ -168,6 +177,22 @@ Android.mk
 **De system/libbase:**
 ```
 /include/              # Android base library headers (android-base/*)
+```
+
+**De system/core:**
+```
+/libutils/include/     # Android utils headers
+/include/              # System headers
+```
+
+**De frameworks/native:**
+```
+/include/              # Native framework headers
+```
+
+**De system/incremental_delivery:**
+```
+/incfs/util/include/   # INCFS utility headers
 ```
 
 Esto reduce significativamente el tamaño de descarga comparado con clonar todo el repositorio frameworks/base.
