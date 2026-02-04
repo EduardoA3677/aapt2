@@ -83,7 +83,8 @@ deps:
 			libprotobuf-dev \
 			zlib1g-dev \
 			libpng-dev \
-			libexpat1-dev; \
+			libexpat1-dev \
+			libfmt-dev; \
 	elif [ -f /etc/redhat-release ]; then \
 		echo "RedHat/CentOS detected"; \
 		sudo yum install -y \
@@ -95,7 +96,8 @@ deps:
 			protobuf-devel \
 			zlib-devel \
 			libpng-devel \
-			expat-devel; \
+			expat-devel \
+			fmt-devel; \
 	elif [ "$$(uname)" = "Darwin" ]; then \
 		echo "macOS detected"; \
 		brew install \
@@ -105,13 +107,14 @@ deps:
 			protobuf \
 			zlib \
 			libpng \
-			expat; \
+			expat \
+			fmt; \
 	else \
 		echo "Unknown OS. Please install dependencies manually:"; \
 		echo "  - CMake (>= 3.10)"; \
 		echo "  - Ninja build"; \
 		echo "  - Protobuf compiler"; \
-		echo "  - Development libraries: zlib, libpng, expat"; \
+		echo "  - Development libraries: zlib, libpng, expat, fmt"; \
 	fi
 
 clean:

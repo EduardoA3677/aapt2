@@ -43,7 +43,8 @@ sudo apt-get install -y \
     libprotobuf-dev \
     zlib1g-dev \
     libpng-dev \
-    libexpat1-dev
+    libexpat1-dev \
+    libfmt-dev
 ```
 
 #### Fedora/RHEL/CentOS
@@ -59,7 +60,8 @@ sudo dnf install -y \
     protobuf-devel \
     zlib-devel \
     libpng-devel \
-    expat-devel
+    expat-devel \
+    fmt-devel
 ```
 
 #### macOS
@@ -79,7 +81,8 @@ brew install \
     protobuf \
     zlib \
     libpng \
-    expat
+    expat \
+    fmt
 ```
 
 #### Windows (WSL2)
@@ -259,14 +262,15 @@ This usually means a library is missing:
 
 ```bash
 # Check what libraries are available
-ldconfig -p | grep -E "(protobuf|png|expat|z)"
+ldconfig -p | grep -E "(protobuf|png|expat|z|fmt)"
 
 # Reinstall development packages
 sudo apt-get install --reinstall \
     libprotobuf-dev \
     libpng-dev \
     libexpat1-dev \
-    zlib1g-dev
+    zlib1g-dev \
+    libfmt-dev
 ```
 
 ### Issue: Out of memory during build

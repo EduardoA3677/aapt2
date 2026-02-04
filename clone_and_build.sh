@@ -11,6 +11,7 @@ SYSTEM_CORE_URL="https://android.googlesource.com/platform/system/core"
 NATIVE_URL="https://android.googlesource.com/platform/frameworks/native"
 INCFS_URL="https://android.googlesource.com/platform/system/incremental_delivery"
 LIBLOG_URL="https://android.googlesource.com/platform/system/logging"
+FMTLIB_URL="https://android.googlesource.com/platform/external/fmtlib"
 TAG="android-16.0.0_r4"
 WORK_DIR=$(pwd)
 
@@ -223,6 +224,39 @@ EOF
     
     echo "system-logging clone completed successfully!"
     cd "$WORK_DIR"
+    
+    echo ""
+    echo "Step 25: Initializing fmtlib repository..."
+    if [ -d "fmtlib" ]; then
+        echo "Removing existing fmtlib directory..."
+        rm -rf fmtlib
+    fi
+    
+    mkdir -p fmtlib
+    cd fmtlib
+    
+    git init
+    git remote add origin $FMTLIB_URL
+    
+    echo "Step 26: Configuring sparse checkout for fmtlib..."
+    git config core.sparseCheckout true
+    
+    # Define sparse checkout paths for fmtlib
+    cat > .git/info/sparse-checkout << EOF
+# fmtlib source and headers
+/include/
+/src/
+/CMakeLists.txt
+EOF
+    
+    echo "Step 27: Fetching refs/tags/$TAG from fmtlib (this may take a while)..."
+    git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
+    
+    echo "Step 28: Checking out tag $TAG..."
+    git checkout $TAG
+    
+    echo "fmtlib clone completed successfully!"
+    cd "$WORK_DIR"
 }
 
 # Function to check build dependencies
@@ -303,6 +337,9 @@ project(aapt2)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Build fmtlib from source
+add_subdirectory(${CMAKE_SOURCE_DIR}/../fmtlib ${CMAKE_BINARY_DIR}/fmt)
+
 # Find required packages
 find_package(Protobuf REQUIRED)
 find_package(ZLIB REQUIRED)
@@ -321,6 +358,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/../native/include
     ${CMAKE_SOURCE_DIR}/../incfs/incfs/util/include
     ${CMAKE_SOURCE_DIR}/../liblog/liblog/include
+    ${CMAKE_SOURCE_DIR}/../fmtlib/include
     ${PROTOBUF_INCLUDE_DIRS}
 )
 
@@ -336,6 +374,7 @@ list(FILTER AAPT2_SOURCES EXCLUDE REGEX ".*/tests/.*")
 # Build AAPT2 executable
 add_executable(aapt2 ${AAPT2_SOURCES})
 target_link_libraries(aapt2 
+    fmt::fmt
     ${PROTOBUF_LIBRARIES}
     ${ZLIB_LIBRARIES}
     PNG::PNG
@@ -347,6 +386,7 @@ target_link_libraries(aapt2
 add_executable(aapt2_64 ${AAPT2_SOURCES})
 set_target_properties(aapt2_64 PROPERTIES COMPILE_FLAGS "-m64")
 target_link_libraries(aapt2_64 
+    fmt::fmt
     ${PROTOBUF_LIBRARIES}
     ${ZLIB_LIBRARIES}
     PNG::PNG
@@ -367,6 +407,7 @@ list(FILTER AAPT_SOURCES EXCLUDE REGEX ".*/tests/.*")
 if(AAPT_SOURCES)
     add_executable(aapt ${AAPT_SOURCES})
     target_link_libraries(aapt 
+        fmt::fmt
         ${ZLIB_LIBRARIES}
         PNG::PNG
         ${EXPAT_LIBRARIES}
@@ -377,6 +418,7 @@ if(AAPT_SOURCES)
     add_executable(aapt_64 ${AAPT_SOURCES})
     set_target_properties(aapt_64 PROPERTIES COMPILE_FLAGS "-m64")
     target_link_libraries(aapt_64 
+        fmt::fmt
         ${ZLIB_LIBRARIES}
         PNG::PNG
         ${EXPAT_LIBRARIES}

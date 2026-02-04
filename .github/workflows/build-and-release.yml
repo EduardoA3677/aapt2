@@ -112,6 +112,9 @@ jobs:
           set(CMAKE_CXX_STANDARD_REQUIRED ON)
           set(CMAKE_BUILD_TYPE Release)
           
+          # Build fmtlib from source
+          add_subdirectory(${CMAKE_SOURCE_DIR}/../fmtlib ${CMAKE_BINARY_DIR}/fmt)
+          
           # Find required packages
           find_package(Protobuf REQUIRED)
           find_package(ZLIB REQUIRED)
@@ -147,6 +150,7 @@ jobs:
           if(AAPT2_SOURCES)
               add_executable(aapt2 ${AAPT2_SOURCES})
               target_link_libraries(aapt2 
+                  fmt::fmt
                   ${PROTOBUF_LIBRARIES}
                   ${ZLIB_LIBRARIES}
                   PNG::PNG
@@ -158,6 +162,7 @@ jobs:
               add_executable(aapt2_64 ${AAPT2_SOURCES})
               set_target_properties(aapt2_64 PROPERTIES COMPILE_FLAGS "-m64")
               target_link_libraries(aapt2_64 
+                  fmt::fmt
                   ${PROTOBUF_LIBRARIES}
                   ${ZLIB_LIBRARIES}
                   PNG::PNG
@@ -179,6 +184,7 @@ jobs:
           if(AAPT_SOURCES)
               add_executable(aapt ${AAPT_SOURCES})
               target_link_libraries(aapt 
+                  fmt::fmt
                   ${ZLIB_LIBRARIES}
                   PNG::PNG
                   ${EXPAT_LIBRARIES}
@@ -189,6 +195,7 @@ jobs:
               add_executable(aapt_64 ${AAPT_SOURCES})
               set_target_properties(aapt_64 PROPERTIES COMPILE_FLAGS "-m64")
               target_link_libraries(aapt_64 
+                  fmt::fmt
                   ${ZLIB_LIBRARIES}
                   PNG::PNG
                   ${EXPAT_LIBRARIES}
