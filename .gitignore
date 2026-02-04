@@ -19,6 +19,7 @@ libbase/
 system-core/
 native/
 incfs/
+liblog/
 android-build/
 
 # CMake

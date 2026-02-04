@@ -10,6 +10,7 @@ LIBBASE_URL="https://android.googlesource.com/platform/system/libbase"
 SYSTEM_CORE_URL="https://android.googlesource.com/platform/system/core"
 NATIVE_URL="https://android.googlesource.com/platform/frameworks/native"
 INCFS_URL="https://android.googlesource.com/platform/system/incremental_delivery"
+LIBLOG_URL="https://android.googlesource.com/platform/system/logging"
 TAG="android-16.0.0_r4"
 WORK_DIR=$(pwd)
 
@@ -117,7 +118,7 @@ EOF
     # Define sparse checkout paths for libutils headers
     cat > .git/info/sparse-checkout << EOF
 # libutils headers
-/libutils/include/
+/libutils/
 /include/
 EOF
     
@@ -191,6 +192,37 @@ EOF
     
     echo "incremental_delivery clone completed successfully!"
     cd "$WORK_DIR"
+    
+    echo ""
+    echo "Step 21: Initializing system-logging repository..."
+    if [ -d "liblog" ]; then
+        echo "Removing existing liblog directory..."
+        rm -rf liblog
+    fi
+    
+    mkdir -p liblog
+    cd liblog
+    
+    git init
+    git remote add origin $LIBLOG_URL
+    
+    echo "Step 22: Configuring sparse checkout for system-logging..."
+    git config core.sparseCheckout true
+    
+    # Define sparse checkout paths for liblog headers
+    cat > .git/info/sparse-checkout << EOF
+# liblog headers
+/liblog/include/
+EOF
+    
+    echo "Step 23: Fetching refs/tags/$TAG from system-logging (this may take a while)..."
+    git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
+    
+    echo "Step 24: Checking out tag $TAG..."
+    git checkout $TAG
+    
+    echo "system-logging clone completed successfully!"
+    cd "$WORK_DIR"
 }
 
 # Function to check build dependencies
@@ -227,6 +259,10 @@ check_dependencies() {
         MISSING_DEPS+=("libprotobuf-dev")
     fi
     
+    if ! ldconfig -p | grep -q libfmt.so; then
+        MISSING_DEPS+=("libfmt-dev")
+    fi
+    
     if [ ${#MISSING_DEPS[@]} -ne 0 ]; then
         echo "ERROR: Missing dependencies: ${MISSING_DEPS[*]}"
         echo ""
@@ -235,7 +271,7 @@ check_dependencies() {
         echo "sudo apt-get install -y ${MISSING_DEPS[*]} build-essential pkg-config libexpat1-dev libpng-dev"
         echo ""
         echo "On macOS, install with:"
-        echo "brew install ${MISSING_DEPS[*]} expat libpng"
+        echo "brew install ${MISSING_DEPS[*]} expat libpng fmt"
         return 1
     fi
     
@@ -284,6 +320,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/../system-core/include
     ${CMAKE_SOURCE_DIR}/../native/include
     ${CMAKE_SOURCE_DIR}/../incfs/incfs/util/include
+    ${CMAKE_SOURCE_DIR}/../liblog/liblog/include
     ${PROTOBUF_INCLUDE_DIRS}
 )
 
