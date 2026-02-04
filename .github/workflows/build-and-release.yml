@@ -112,7 +112,86 @@ jobs:
           set(CMAKE_CXX_STANDARD_REQUIRED ON)
           set(CMAKE_BUILD_TYPE Release)
           
-          # Find required packages
+          # Build dependencies from source
+          # Note: The workflow clones repos into short directory names (base, core, logging)
+          # while clone_and_build.sh uses full AOSP names (frameworks-base, system-core, liblog).
+          # Each section below checks appropriate paths for its context.
+          # Some dependencies are built from the cloned Android sources
+          # while others use system libraries via find_package
+          
+          # Build fmtlib from source
+          add_subdirectory(${CMAKE_SOURCE_DIR}/../fmtlib ${CMAKE_BINARY_DIR}/fmt)
+          
+          # Build libbase from source (Android base library)
+          # Note: libbase requires special handling as it's an Android-specific library
+          # We'll include it in the build if it has CMakeLists.txt
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../libbase/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../libbase ${CMAKE_BINARY_DIR}/libbase)
+          elseif(EXISTS ${CMAKE_SOURCE_DIR}/../libbase/base/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../libbase/base ${CMAKE_BINARY_DIR}/libbase)
+          endif()
+          
+          # Build liblog from source (Android logging library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../logging/liblog/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../logging/liblog ${CMAKE_BINARY_DIR}/liblog)
+          elseif(EXISTS ${CMAKE_SOURCE_DIR}/../logging/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../logging ${CMAKE_BINARY_DIR}/liblog)
+          endif()
+          
+          # Build libutils from source (Android utilities)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../core/libutils/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../core/libutils ${CMAKE_BINARY_DIR}/libutils)
+          elseif(EXISTS ${CMAKE_SOURCE_DIR}/../core/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../core ${CMAKE_BINARY_DIR}/libutils)
+          endif()
+          
+          # Build libziparchive from source (Android ZIP library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../libziparchive/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../libziparchive ${CMAKE_BINARY_DIR}/libziparchive)
+          elseif(EXISTS ${CMAKE_SOURCE_DIR}/../libziparchive/libziparchive/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../libziparchive/libziparchive ${CMAKE_BINARY_DIR}/libziparchive)
+          endif()
+          
+          # Build androidfw from source (Android framework library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../base/libs/androidfw/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../base/libs/androidfw ${CMAKE_BINARY_DIR}/androidfw)
+          elseif(EXISTS ${CMAKE_SOURCE_DIR}/../base/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../base ${CMAKE_BINARY_DIR}/androidfw)
+          endif()
+          
+          # Build zopfli from source (compression library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../zopfli/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../zopfli ${CMAKE_BINARY_DIR}/zopfli)
+          endif()
+          
+          # Build pcre from source (regex library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../pcre/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../pcre ${CMAKE_BINARY_DIR}/pcre)
+          endif()
+          
+          # Build boringssl from source (SSL library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../boringssl/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../boringssl ${CMAKE_BINARY_DIR}/boringssl)
+          endif()
+          
+          # Build expat from source (XML parser)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../expat/expat/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../expat/expat ${CMAKE_BINARY_DIR}/expat)
+          endif()
+          
+          # Build libpng from source (PNG library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../libpng/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../libpng ${CMAKE_BINARY_DIR}/libpng)
+          endif()
+          
+          # Build protobuf from source (Protocol Buffers)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../protobuf/cmake/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../protobuf/cmake ${CMAKE_BINARY_DIR}/protobuf)
+          endif()
+          
+          # Find required system packages
+          # Note: These are still REQUIRED as some dependencies may not have CMakeLists.txt
+          # or may need system versions of these libraries for linking
           find_package(Protobuf REQUIRED)
           find_package(ZLIB REQUIRED)
           find_package(PNG REQUIRED)
@@ -147,6 +226,7 @@ jobs:
           if(AAPT2_SOURCES)
               add_executable(aapt2 ${AAPT2_SOURCES})
               target_link_libraries(aapt2 
+                  fmt::fmt
                   ${PROTOBUF_LIBRARIES}
                   ${ZLIB_LIBRARIES}
                   PNG::PNG
@@ -158,6 +238,7 @@ jobs:
               add_executable(aapt2_64 ${AAPT2_SOURCES})
               set_target_properties(aapt2_64 PROPERTIES COMPILE_FLAGS "-m64")
               target_link_libraries(aapt2_64 
+                  fmt::fmt
                   ${PROTOBUF_LIBRARIES}
                   ${ZLIB_LIBRARIES}
                   PNG::PNG
@@ -179,6 +260,7 @@ jobs:
           if(AAPT_SOURCES)
               add_executable(aapt ${AAPT_SOURCES})
               target_link_libraries(aapt 
+                  fmt::fmt
                   ${ZLIB_LIBRARIES}
                   PNG::PNG
                   ${EXPAT_LIBRARIES}
@@ -189,6 +271,7 @@ jobs:
               add_executable(aapt_64 ${AAPT_SOURCES})
               set_target_properties(aapt_64 PROPERTIES COMPILE_FLAGS "-m64")
               target_link_libraries(aapt_64 
+                  fmt::fmt
                   ${ZLIB_LIBRARIES}
                   PNG::PNG
                   ${EXPAT_LIBRARIES}
