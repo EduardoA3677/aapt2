@@ -352,16 +352,22 @@ endif()
 # Build liblog from source (Android logging library) if available
 if(EXISTS ${CMAKE_SOURCE_DIR}/../liblog/liblog/CMakeLists.txt)
     add_subdirectory(${CMAKE_SOURCE_DIR}/../liblog/liblog ${CMAKE_BINARY_DIR}/liblog)
+elseif(EXISTS ${CMAKE_SOURCE_DIR}/../liblog/CMakeLists.txt)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/../liblog ${CMAKE_BINARY_DIR}/liblog)
 endif()
 
 # Build libutils from source (Android utilities) if available
 if(EXISTS ${CMAKE_SOURCE_DIR}/../system-core/libutils/CMakeLists.txt)
     add_subdirectory(${CMAKE_SOURCE_DIR}/../system-core/libutils ${CMAKE_BINARY_DIR}/libutils)
+elseif(EXISTS ${CMAKE_SOURCE_DIR}/../system-core/CMakeLists.txt)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/../system-core ${CMAKE_BINARY_DIR}/libutils)
 endif()
 
 # Build androidfw from source (Android framework library) if available
 if(EXISTS ${CMAKE_SOURCE_DIR}/../frameworks-base/libs/androidfw/CMakeLists.txt)
     add_subdirectory(${CMAKE_SOURCE_DIR}/../frameworks-base/libs/androidfw ${CMAKE_BINARY_DIR}/androidfw)
+elseif(EXISTS ${CMAKE_SOURCE_DIR}/../frameworks-base/CMakeLists.txt)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/../frameworks-base ${CMAKE_BINARY_DIR}/androidfw)
 endif()
 
 # Find required system packages as fallback
