@@ -66,6 +66,9 @@ jobs:
         run: |
           echo "Cloning frameworks/base with sparse checkout..."
           git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/base platform/frameworks/base
+
+          echo "Cloning frameworks/native with sparse checkout..."
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/native platform/frameworks/native
           
           # Clone system/libbase for android-base headers
           echo "Cloning system/libbase for android-base headers..."
@@ -101,6 +104,7 @@ jobs:
               ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/tools/aapt2/include
               ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/libs/androidfw/include
               ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/include
+              ${CMAKE_SOURCE_DIR}/../platform/frameworks/native/include
               ${CMAKE_SOURCE_DIR}/../platform/system/libbase/include
               ${CMAKE_SOURCE_DIR}/../platform/system/core/libutils/include
               ${CMAKE_SOURCE_DIR}/../platform/system/core/include
