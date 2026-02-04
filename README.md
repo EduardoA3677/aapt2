@@ -6,7 +6,7 @@ Este repositorio contiene scripts y configuración para clonar y compilar los bi
 
 Este proyecto clona únicamente los archivos y carpetas necesarios de:
 - **Repositorio frameworks/base**: https://android.googlesource.com/platform/frameworks/base
-- **Repositorio system/core**: https://android.googlesource.com/platform/system/core
+- **Repositorio system/libbase**: https://android.googlesource.com/platform/system/libbase
 - **Tag**: android-16.0.0_r4
 
 Y compila los siguientes binarios:
@@ -127,8 +127,8 @@ aapt2/
 │   ├── tools/aapt2/        # Fuentes de AAPT2
 │   ├── tools/aapt/         # Fuentes de AAPT
 │   └── libs/androidfw/     # Bibliotecas de Android Framework
-├── system-core/             # Código fuente de system-core (creado después de clonar)
-│   └── base/include/       # Android base library headers
+├── libbase/                 # Código fuente de libbase (creado después de clonar)
+│   └── include/android-base/ # Android base library headers
 └── build/                   # Directorio de compilación (creado durante build)
     ├── aapt2               # Binario AAPT2
     ├── aapt2_64            # Binario AAPT2 64-bit
@@ -165,9 +165,9 @@ Android.bp             # Archivos de build
 Android.mk
 ```
 
-**De system/core:**
+**De system/libbase:**
 ```
-/base/include/         # Android base library headers
+/include/              # Android base library headers (android-base/*)
 ```
 
 Esto reduce significativamente el tamaño de descarga comparado con clonar todo el repositorio frameworks/base.

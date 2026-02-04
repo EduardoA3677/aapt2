@@ -6,7 +6,7 @@ set -e
 # Tag: android-16.0.0_r4
 
 REPO_URL="https://android.googlesource.com/platform/frameworks/base"
-SYSTEM_CORE_URL="https://android.googlesource.com/platform/system/core"
+LIBBASE_URL="https://android.googlesource.com/platform/system/libbase"
 TAG="android-16.0.0_r4"
 WORK_DIR=$(pwd)
 
@@ -64,34 +64,34 @@ EOF
     cd "$WORK_DIR"
     
     echo ""
-    echo "Step 5: Initializing system-core repository..."
-    if [ -d "system-core" ]; then
-        echo "Removing existing system-core directory..."
-        rm -rf system-core
+    echo "Step 5: Initializing libbase repository..."
+    if [ -d "libbase" ]; then
+        echo "Removing existing libbase directory..."
+        rm -rf libbase
     fi
     
-    mkdir -p system-core
-    cd system-core
+    mkdir -p libbase
+    cd libbase
     
     git init
-    git remote add origin $SYSTEM_CORE_URL
+    git remote add origin $LIBBASE_URL
     
-    echo "Step 6: Configuring sparse checkout for system-core..."
+    echo "Step 6: Configuring sparse checkout for libbase..."
     git config core.sparseCheckout true
     
     # Define sparse checkout paths for android-base headers
     cat > .git/info/sparse-checkout << EOF
 # Android base library headers
-/base/include/
+/include/
 EOF
     
-    echo "Step 7: Fetching refs/tags/$TAG from system-core (this may take a while)..."
+    echo "Step 7: Fetching refs/tags/$TAG from libbase (this may take a while)..."
     git fetch --depth 1 origin refs/tags/$TAG:refs/tags/$TAG
     
     echo "Step 8: Checking out tag $TAG..."
     git checkout $TAG
     
-    echo "system-core clone completed successfully!"
+    echo "libbase clone completed successfully!"
     cd "$WORK_DIR"
 }
 
@@ -181,7 +181,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/../frameworks-base/tools/aapt2/include
     ${CMAKE_SOURCE_DIR}/../frameworks-base/libs/androidfw/include
     ${CMAKE_SOURCE_DIR}/../frameworks-base/include
-    ${CMAKE_SOURCE_DIR}/../system-core/base/include
+    ${CMAKE_SOURCE_DIR}/../libbase/include
     ${PROTOBUF_INCLUDE_DIRS}
 )
 
