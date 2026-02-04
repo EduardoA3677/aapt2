@@ -175,16 +175,14 @@ jobs:
           endif()
           
           # Build boringssl from source (SSL library)
+          # Note: Benchmarks are disabled globally above
           if(EXISTS ${CMAKE_SOURCE_DIR}/../boringssl/CMakeLists.txt)
-              # Disable benchmark build in boringssl to avoid target name conflicts
-              set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
-              set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
               add_subdirectory(${CMAKE_SOURCE_DIR}/../boringssl ${CMAKE_BINARY_DIR}/boringssl)
           endif()
           
           # Build expat from source (XML parser)
           if(EXISTS ${CMAKE_SOURCE_DIR}/../expat/expat/CMakeLists.txt)
-              # Disable benchmark and examples build in expat to avoid target name conflicts
+              # Disable tests and examples to avoid benchmark target name conflicts
               set(EXPAT_BUILD_TESTS OFF CACHE BOOL "" FORCE)
               set(EXPAT_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
               add_subdirectory(${CMAKE_SOURCE_DIR}/../expat/expat ${CMAKE_BINARY_DIR}/expat)
