@@ -113,7 +113,10 @@ jobs:
           set(CMAKE_BUILD_TYPE Release)
           
           # Build dependencies from source
-          # Note: Some dependencies are built from the cloned Android sources
+          # Note: The workflow clones repos into short directory names (base, core, logging)
+          # while clone_and_build.sh uses full AOSP names (frameworks-base, system-core, liblog).
+          # Each section below checks appropriate paths for its context.
+          # Some dependencies are built from the cloned Android sources
           # while others use system libraries via find_package
           
           # Build fmtlib from source

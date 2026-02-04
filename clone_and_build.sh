@@ -338,7 +338,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Build dependencies from source
-# Note: Most Android dependencies will just use headers, as they use Android.bp build system
+# Note: clone_and_build.sh uses full AOSP directory names (frameworks-base, system-core, liblog)
+# while the workflow uses short names (base, core, logging).
+# Each section below checks appropriate paths for its context.
+# Most Android dependencies will just use headers, as they use Android.bp build system
 # We add subdirectories for dependencies that have CMakeLists.txt files
 
 # Build fmtlib from source
