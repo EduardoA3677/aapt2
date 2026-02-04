@@ -112,10 +112,72 @@ jobs:
           set(CMAKE_CXX_STANDARD_REQUIRED ON)
           set(CMAKE_BUILD_TYPE Release)
           
+          # Build dependencies from source
+          # Note: Some dependencies are built from the cloned Android sources
+          # while others use system libraries via find_package
+          
           # Build fmtlib from source
           add_subdirectory(${CMAKE_SOURCE_DIR}/../fmtlib ${CMAKE_BINARY_DIR}/fmt)
           
-          # Find required packages
+          # Build libbase from source (Android base library)
+          # Note: libbase requires special handling as it's an Android-specific library
+          # We'll include it in the build if it has CMakeLists.txt
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../libbase/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../libbase ${CMAKE_BINARY_DIR}/libbase)
+          endif()
+          
+          # Build liblog from source (Android logging library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../logging/liblog/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../logging/liblog ${CMAKE_BINARY_DIR}/liblog)
+          endif()
+          
+          # Build libutils from source (Android utilities)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../core/libutils/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../core/libutils ${CMAKE_BINARY_DIR}/libutils)
+          endif()
+          
+          # Build libziparchive from source (Android ZIP library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../libziparchive/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../libziparchive ${CMAKE_BINARY_DIR}/libziparchive)
+          endif()
+          
+          # Build androidfw from source (Android framework library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../base/libs/androidfw/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../base/libs/androidfw ${CMAKE_BINARY_DIR}/androidfw)
+          endif()
+          
+          # Build zopfli from source (compression library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../zopfli/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../zopfli ${CMAKE_BINARY_DIR}/zopfli)
+          endif()
+          
+          # Build pcre from source (regex library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../pcre/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../pcre ${CMAKE_BINARY_DIR}/pcre)
+          endif()
+          
+          # Build boringssl from source (SSL library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../boringssl/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../boringssl ${CMAKE_BINARY_DIR}/boringssl)
+          endif()
+          
+          # Build expat from source (XML parser)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../expat/expat/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../expat/expat ${CMAKE_BINARY_DIR}/expat)
+          endif()
+          
+          # Build libpng from source (PNG library)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../libpng/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../libpng ${CMAKE_BINARY_DIR}/libpng)
+          endif()
+          
+          # Build protobuf from source (Protocol Buffers)
+          if(EXISTS ${CMAKE_SOURCE_DIR}/../protobuf/cmake/CMakeLists.txt)
+              add_subdirectory(${CMAKE_SOURCE_DIR}/../protobuf/cmake ${CMAKE_BINARY_DIR}/protobuf)
+          endif()
+          
+          # Find required system packages as fallback
+          # These will be used if the above subdirectories don't exist or fail
           find_package(Protobuf REQUIRED)
           find_package(ZLIB REQUIRED)
           find_package(PNG REQUIRED)

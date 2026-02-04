@@ -337,10 +337,34 @@ project(aapt2)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Build dependencies from source
+# Note: Most Android dependencies will just use headers, as they use Android.bp build system
+# We add subdirectories for dependencies that have CMakeLists.txt files
+
 # Build fmtlib from source
 add_subdirectory(${CMAKE_SOURCE_DIR}/../fmtlib ${CMAKE_BINARY_DIR}/fmt)
 
-# Find required packages
+# Build libbase from source (Android base library) if available
+if(EXISTS ${CMAKE_SOURCE_DIR}/../libbase/CMakeLists.txt)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/../libbase ${CMAKE_BINARY_DIR}/libbase)
+endif()
+
+# Build liblog from source (Android logging library) if available
+if(EXISTS ${CMAKE_SOURCE_DIR}/../liblog/liblog/CMakeLists.txt)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/../liblog/liblog ${CMAKE_BINARY_DIR}/liblog)
+endif()
+
+# Build libutils from source (Android utilities) if available
+if(EXISTS ${CMAKE_SOURCE_DIR}/../system-core/libutils/CMakeLists.txt)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/../system-core/libutils ${CMAKE_BINARY_DIR}/libutils)
+endif()
+
+# Build androidfw from source (Android framework library) if available
+if(EXISTS ${CMAKE_SOURCE_DIR}/../frameworks-base/libs/androidfw/CMakeLists.txt)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/../frameworks-base/libs/androidfw ${CMAKE_BINARY_DIR}/androidfw)
+endif()
+
+# Find required system packages as fallback
 find_package(Protobuf REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
