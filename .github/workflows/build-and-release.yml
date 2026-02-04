@@ -183,8 +183,8 @@ jobs:
           # Build expat from source (XML parser)
           if(EXISTS ${CMAKE_SOURCE_DIR}/../expat/expat/CMakeLists.txt)
               # Disable tests and examples to avoid benchmark target name conflicts
-              set(EXPAT_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-              set(EXPAT_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+              set(EXPAT_BUILD_TESTS OFF CACHE BOOL "Disable expat tests" FORCE)
+              set(EXPAT_BUILD_EXAMPLES OFF CACHE BOOL "Disable expat examples" FORCE)
               add_subdirectory(${CMAKE_SOURCE_DIR}/../expat/expat ${CMAKE_BINARY_DIR}/expat)
           endif()
           
