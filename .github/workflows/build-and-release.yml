@@ -126,6 +126,7 @@ jobs:
               ${CMAKE_SOURCE_DIR}/../base/include
               ${CMAKE_SOURCE_DIR}/../native/include
               ${CMAKE_SOURCE_DIR}/../libbase/include
+              ${CMAKE_SOURCE_DIR}/../fmtlib/include
               ${CMAKE_SOURCE_DIR}/../core/libutils/include
               ${CMAKE_SOURCE_DIR}/../core/include
               ${CMAKE_SOURCE_DIR}/../incremental_delivery/incfs/util/include
