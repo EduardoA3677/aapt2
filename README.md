@@ -10,6 +10,7 @@ Este proyecto clona únicamente los archivos y carpetas necesarios de:
 - **Repositorio system/core**: https://android.googlesource.com/platform/system/core
 - **Repositorio frameworks/native**: https://android.googlesource.com/platform/frameworks/native
 - **Repositorio system/incremental_delivery**: https://android.googlesource.com/platform/system/incremental_delivery
+- **Repositorio system/logging**: https://android.googlesource.com/platform/system/logging
 - **Tag**: android-16.0.0_r4
 
 Y compila los siguientes binarios:
@@ -138,6 +139,8 @@ aapt2/
 │   └── include/            # Native framework headers
 ├── incfs/                   # Código fuente de incremental_delivery (creado después de clonar)
 │   └── incfs/util/include/ # INCFS utility headers
+├── liblog/                  # Código fuente de system-logging (creado después de clonar)
+│   └── liblog/include/     # Android logging headers
 └── build/                   # Directorio de compilación (creado durante build)
     ├── aapt2               # Binario AAPT2
     ├── aapt2_64            # Binario AAPT2 64-bit
@@ -193,6 +196,11 @@ Android.mk
 **De system/incremental_delivery:**
 ```
 /incfs/util/include/   # INCFS utility headers
+```
+
+**De system/logging:**
+```
+/liblog/include/       # Android logging headers
 ```
 
 Esto reduce significativamente el tamaño de descarga comparado con clonar todo el repositorio frameworks/base.
