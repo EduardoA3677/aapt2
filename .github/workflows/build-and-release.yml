@@ -64,22 +64,40 @@ jobs:
       
       - name: Clone Android source (sparse checkout)
         run: |
-          echo "Cloning frameworks/base with sparse checkout..."
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/base platform/frameworks/base
+          mkdir src
+          cd src
 
-          echo "Cloning frameworks/native with sparse checkout..."
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/native platform/frameworks/native
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/expat.git expat
+
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/fmtlib.git fmtlib
+
+          git clone https://boringssl.googlesource.com/boringssl.git boringssl
+
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/incremental_delivery incremental_delivery 
           
-          # Clone system/libbase for android-base headers
-          echo "Cloning system/libbase for android-base headers..."
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/libbase platform/system/libbase
-             
-          # Clone system/core for utils headers
-          echo "Cloning system/core for utils headers..."
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/core platform/system/core
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/libbase libbase
+          
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/base base
+
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/libpng libpng
+
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/pcre pcre
+
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/zopfli zopfli
+
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/protobuf protobuf
+
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/selinux selinux
+
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/logging logging
+
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/core core
+
+          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/libziparchive libziparchive
 
       - name: Generate build files
         run: |
+          cd src
           mkdir -p build
           cd build
           
@@ -100,20 +118,18 @@ jobs:
           
           # Include directories
           include_directories(
-              ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/tools/aapt2
-              ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/tools/aapt2/include
-              ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/libs/androidfw/include
-              ${CMAKE_SOURCE_DIR}/../platform/frameworks/base/include
-              ${CMAKE_SOURCE_DIR}/../platform/frameworks/native/include
-              ${CMAKE_SOURCE_DIR}/../platform/system/libbase/include
-              ${CMAKE_SOURCE_DIR}/../platform/system/core/libutils/include
-              ${CMAKE_SOURCE_DIR}/../platform/system/core/include
+              ${CMAKE_SOURCE_DIR}/../boringssl
+              ${CMAKE_SOURCE_DIR}/../fmtlib
+              ${CMAKE_SOURCE_DIR}/../pcre
+              ${CMAKE_SOURCE_DIR}/../expat
+              ${CMAKE_SOURCE_DIR}/../pzopfli
+              ${CMAKE_SOURCE_DIR}/../protobuf/cmake
               ${PROTOBUF_INCLUDE_DIRS}
           )
           
           # Collect AAPT2 source files
           file(GLOB_RECURSE AAPT2_SOURCES 
-              "${CMAKE_SOURCE_DIR}/../platform/frameworks/base/tools/aapt2/*.cpp"
+              "${CMAKE_SOURCE_DIR}/../base/tools/aapt2/*.cpp"
           )
           
           # Remove test files
@@ -145,7 +161,7 @@ jobs:
           
           # Collect AAPT source files
           file(GLOB_RECURSE AAPT_SOURCES 
-              "${CMAKE_SOURCE_DIR}/../platform/frameworks/base/tools/aapt/*.cpp"
+              "${CMAKE_SOURCE_DIR}/../base/tools/aapt/*.cpp"
           )
           
           # Remove test files
