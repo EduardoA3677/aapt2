@@ -91,17 +91,17 @@ jobs:
           
           cd ..
           
-          # Clone system/core for android-base headers
-          echo "Cloning system/core for android-base headers..."
-          mkdir -p system-core
-          cd system-core
+          # Clone system/libbase for android-base headers
+          echo "Cloning system/libbase for android-base headers..."
+          mkdir -p libbase
+          cd libbase
           git init
-          git remote add origin https://android.googlesource.com/platform/system/core
+          git remote add origin https://android.googlesource.com/platform/system/libbase
           git config core.sparseCheckout true
           
-          # Configure sparse checkout for base headers
+          # Configure sparse checkout for android-base headers
           cat > .git/info/sparse-checkout << 'EOF'
-          /base/include/
+          /include/
           EOF
           
           # Fetch and checkout the tag
@@ -110,7 +110,32 @@ jobs:
           git checkout android-16.0.0_r4
           
           echo "android-base headers cloned successfully"
-          ls -la base/include/ || echo "Note: base/include structure may differ"
+          ls -la include/android-base/ || echo "Note: include structure may differ"
+          
+          cd ..
+          
+          # Clone system/core for utils headers
+          echo "Cloning system/core for utils headers..."
+          mkdir -p system-core
+          cd system-core
+          git init
+          git remote add origin https://android.googlesource.com/platform/system/core
+          git config core.sparseCheckout true
+          
+          # Configure sparse checkout for libutils headers
+          cat > .git/info/sparse-checkout << 'EOF'
+          /libutils/include/
+          /include/
+          EOF
+          
+          # Fetch and checkout the tag
+          echo "Fetching refs/tags/android-16.0.0_r4..."
+          git fetch --depth 1 origin refs/tags/android-16.0.0_r4:refs/tags/android-16.0.0_r4
+          git checkout android-16.0.0_r4
+          
+          echo "system-core headers cloned successfully"
+          ls -la libutils/include/ || echo "Note: libutils/include structure may differ"
+          ls -la include/ || echo "Note: include structure may differ"
       
       - name: Generate build files
         run: |
@@ -138,7 +163,9 @@ jobs:
               ${CMAKE_SOURCE_DIR}/../frameworks-base/tools/aapt2/include
               ${CMAKE_SOURCE_DIR}/../frameworks-base/libs/androidfw/include
               ${CMAKE_SOURCE_DIR}/../frameworks-base/include
-              ${CMAKE_SOURCE_DIR}/../system-core/base/include
+              ${CMAKE_SOURCE_DIR}/../libbase/include
+              ${CMAKE_SOURCE_DIR}/../system-core/libutils/include
+              ${CMAKE_SOURCE_DIR}/../system-core/include
               ${PROTOBUF_INCLUDE_DIRS}
           )
           
@@ -332,17 +359,17 @@ jobs:
           
           cd ..
           
-          # Clone system/core for android-base headers
-          echo "Cloning system/core for android-base headers..."
-          mkdir -p system-core
-          cd system-core
+          # Clone system/libbase for android-base headers
+          echo "Cloning system/libbase for android-base headers..."
+          mkdir -p libbase
+          cd libbase
           git init
-          git remote add origin https://android.googlesource.com/platform/system/core
+          git remote add origin https://android.googlesource.com/platform/system/libbase
           git config core.sparseCheckout true
           
-          # Configure sparse checkout for base headers
+          # Configure sparse checkout for android-base headers
           cat > .git/info/sparse-checkout << 'EOF'
-          /base/include/
+          /include/
           EOF
           
           # Fetch and checkout the tag
@@ -351,7 +378,32 @@ jobs:
           git checkout android-16.0.0_r4
           
           echo "android-base headers cloned successfully"
-          ls -la base/include/ || echo "Note: base/include structure may differ"
+          ls -la include/android-base/ || echo "Note: include structure may differ"
+          
+          cd ..
+          
+          # Clone system/core for utils headers
+          echo "Cloning system/core for utils headers..."
+          mkdir -p system-core
+          cd system-core
+          git init
+          git remote add origin https://android.googlesource.com/platform/system/core
+          git config core.sparseCheckout true
+          
+          # Configure sparse checkout for libutils headers
+          cat > .git/info/sparse-checkout << 'EOF'
+          /libutils/include/
+          /include/
+          EOF
+          
+          # Fetch and checkout the tag
+          echo "Fetching refs/tags/android-16.0.0_r4..."
+          git fetch --depth 1 origin refs/tags/android-16.0.0_r4:refs/tags/android-16.0.0_r4
+          git checkout android-16.0.0_r4
+          
+          echo "system-core headers cloned successfully"
+          ls -la libutils/include/ || echo "Note: libutils/include structure may differ"
+          ls -la include/ || echo "Note: include structure may differ"
       
       - name: Generate build files
         run: |
@@ -379,7 +431,9 @@ jobs:
               ${CMAKE_SOURCE_DIR}/../frameworks-base/tools/aapt2/include
               ${CMAKE_SOURCE_DIR}/../frameworks-base/libs/androidfw/include
               ${CMAKE_SOURCE_DIR}/../frameworks-base/include
-              ${CMAKE_SOURCE_DIR}/../system-core/base/include
+              ${CMAKE_SOURCE_DIR}/../libbase/include
+              ${CMAKE_SOURCE_DIR}/../system-core/libutils/include
+              ${CMAKE_SOURCE_DIR}/../system-core/include
               ${PROTOBUF_INCLUDE_DIRS}
           )
           
