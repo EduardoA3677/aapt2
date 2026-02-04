@@ -192,8 +192,7 @@ jobs:
       
       - name: Build AAPT2 binaries
         run: |
-          cd src
-          cd build
+          cd src/build
           cmake -G "Unix Makefiles" .
           make -j$(nproc) VERBOSE=1 || true
           
@@ -202,8 +201,7 @@ jobs:
       
       - name: Strip binaries
         run: |
-          cd src
-          cd build
+          cd src/build
           for binary in aapt2 aapt2_64 aapt aapt_64; do
             if [ -f "$binary" ]; then
               strip "$binary"
@@ -213,8 +211,7 @@ jobs:
       
       - name: Verify binaries
         run: |
-          cd src
-          cd build
+          cd src/build
           chmod +x verify_build.sh 2>/dev/null || true
           
           echo "Listing built binaries:"
@@ -233,9 +230,8 @@ jobs:
       
       - name: Package binaries
         run: |
-          cd src
-          mkdir -p release/linux
-          cd build
+          mkdir -p src/release/linux
+          cd src/build
           
           # Copy available binaries
           for binary in aapt2 aapt2_64 aapt aapt_64; do
