@@ -186,8 +186,9 @@ jobs:
               add_subdirectory(${CMAKE_SOURCE_DIR}/../protobuf/cmake ${CMAKE_BINARY_DIR}/protobuf)
           endif()
           
-          # Find required system packages as fallback
-          # These will be used if the above subdirectories don't exist or fail
+          # Find required system packages
+          # Note: These are still REQUIRED as some dependencies may not have CMakeLists.txt
+          # or may need system versions of these libraries for linking
           find_package(Protobuf REQUIRED)
           find_package(ZLIB REQUIRED)
           find_package(PNG REQUIRED)

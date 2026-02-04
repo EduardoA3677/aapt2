@@ -372,7 +372,9 @@ elseif(EXISTS ${CMAKE_SOURCE_DIR}/../frameworks-base/CMakeLists.txt)
     add_subdirectory(${CMAKE_SOURCE_DIR}/../frameworks-base ${CMAKE_BINARY_DIR}/androidfw)
 endif()
 
-# Find required system packages as fallback
+# Find required system packages
+# Note: These are still REQUIRED as some dependencies may not have CMakeLists.txt
+# or may need system versions of these libraries for linking
 find_package(Protobuf REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
