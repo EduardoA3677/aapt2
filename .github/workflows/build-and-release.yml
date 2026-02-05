@@ -216,6 +216,7 @@ jobs:
                   ${ANDROID_SRC_DIR}/logging/liblog/include
                   ${ANDROID_SRC_DIR}/libbase/include
               )
+              target_compile_definitions(android_log PRIVATE LIBLOG_LOG_TAG=1006)
           endif()
           
           # --- Build libutils (Android utilities) ---
