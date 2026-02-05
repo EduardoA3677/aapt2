@@ -67,35 +67,34 @@ jobs:
           mkdir src
           cd src
 
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/expat.git expat
-
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/fmtlib.git fmtlib
-
-          git clone https://boringssl.googlesource.com/boringssl.git boringssl
-
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/incremental_delivery incremental_delivery 
+          # Clone required AOSP repositories
+          # Using depth=1 to speed up cloning
           
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/libbase libbase
+          git clone --depth=1 -b android-16.0.0_r4 https://android.googlesource.com/platform/external/expat.git expat
+
+          git clone --depth=1 -b android-16.0.0_r4 https://android.googlesource.com/platform/external/fmtlib.git fmtlib
+
+          git clone --depth=1 -b android-16.0.0_r4 https://android.googlesource.com/platform/system/incremental_delivery incremental_delivery 
           
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/base base
+          git clone --depth=1 -b android-16.0.0_r4 https://android.googlesource.com/platform/system/libbase libbase
           
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/native native
+          git clone --depth=1 -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/base base
+          
+          git clone --depth=1 -b android-16.0.0_r4 https://android.googlesource.com/platform/frameworks/native native
 
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/libpng libpng
+          git clone --depth=1 -b android-16.0.0_r4 https://android.googlesource.com/platform/external/libpng libpng
 
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/pcre pcre
+          git clone --depth=1 -b android-16.0.0_r4 https://android.googlesource.com/platform/external/pcre pcre
 
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/zopfli zopfli
+          git clone --depth=1 -b android-16.0.0_r4 https://android.googlesource.com/platform/external/zopfli zopfli
 
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/protobuf protobuf
+          git clone --depth=1 -b android-16.0.0_r4 https://android.googlesource.com/platform/external/selinux selinux
 
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/external/selinux selinux
+          git clone --depth=1 -b android-16.0.0_r4 https://android.googlesource.com/platform/system/logging logging
 
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/logging logging
+          git clone --depth=1 -b android-16.0.0_r4 https://android.googlesource.com/platform/system/core core
 
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/core core
-
-          git clone -b android-16.0.0_r4 https://android.googlesource.com/platform/system/libziparchive libziparchive
+          git clone --depth=1 -b android-16.0.0_r4 https://android.googlesource.com/platform/system/libziparchive libziparchive
 
       - name: Generate build files
         run: |
@@ -112,57 +111,18 @@ jobs:
           set(CMAKE_CXX_STANDARD_REQUIRED ON)
           set(CMAKE_BUILD_TYPE Release)
           
+          # Add compile definitions for Android compatibility
+          add_definitions(-D__ANDROID_HOST__)
+          add_definitions(-D_GNU_SOURCE)
+          add_definitions(-DANDROID)
+          
           # Disable benchmarks globally to avoid target name conflicts
           set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Disable benchmark testing" FORCE)
           set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "Disable benchmark install" FORCE)
           set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "Disable benchmark gtest" FORCE)
           
-          # Build dependencies from source
-          # Note: The workflow clones repos into short directory names (base, core, logging)
-          # while clone_and_build.sh uses full AOSP names (frameworks-base, system-core, liblog).
-          # Each section below checks appropriate paths for its context.
-          # Some dependencies are built from the cloned Android sources
-          # while others use system libraries via find_package
-          
-          # Build fmtlib from source
+          # Build fmtlib from source (required dependency)
           add_subdirectory(${CMAKE_SOURCE_DIR}/../fmtlib ${CMAKE_BINARY_DIR}/fmt)
-          
-          # Build libbase from source (Android base library)
-          # Note: libbase requires special handling as it's an Android-specific library
-          # We'll include it in the build if it has CMakeLists.txt
-          if(EXISTS ${CMAKE_SOURCE_DIR}/../libbase/CMakeLists.txt)
-              add_subdirectory(${CMAKE_SOURCE_DIR}/../libbase ${CMAKE_BINARY_DIR}/libbase)
-          elseif(EXISTS ${CMAKE_SOURCE_DIR}/../libbase/base/CMakeLists.txt)
-              add_subdirectory(${CMAKE_SOURCE_DIR}/../libbase/base ${CMAKE_BINARY_DIR}/libbase)
-          endif()
-          
-          # Build liblog from source (Android logging library)
-          if(EXISTS ${CMAKE_SOURCE_DIR}/../logging/liblog/CMakeLists.txt)
-              add_subdirectory(${CMAKE_SOURCE_DIR}/../logging/liblog ${CMAKE_BINARY_DIR}/liblog)
-          elseif(EXISTS ${CMAKE_SOURCE_DIR}/../logging/CMakeLists.txt)
-              add_subdirectory(${CMAKE_SOURCE_DIR}/../logging ${CMAKE_BINARY_DIR}/liblog)
-          endif()
-          
-          # Build libutils from source (Android utilities)
-          if(EXISTS ${CMAKE_SOURCE_DIR}/../core/libutils/CMakeLists.txt)
-              add_subdirectory(${CMAKE_SOURCE_DIR}/../core/libutils ${CMAKE_BINARY_DIR}/libutils)
-          elseif(EXISTS ${CMAKE_SOURCE_DIR}/../core/CMakeLists.txt)
-              add_subdirectory(${CMAKE_SOURCE_DIR}/../core ${CMAKE_BINARY_DIR}/libutils)
-          endif()
-          
-          # Build libziparchive from source (Android ZIP library)
-          if(EXISTS ${CMAKE_SOURCE_DIR}/../libziparchive/CMakeLists.txt)
-              add_subdirectory(${CMAKE_SOURCE_DIR}/../libziparchive ${CMAKE_BINARY_DIR}/libziparchive)
-          elseif(EXISTS ${CMAKE_SOURCE_DIR}/../libziparchive/libziparchive/CMakeLists.txt)
-              add_subdirectory(${CMAKE_SOURCE_DIR}/../libziparchive/libziparchive ${CMAKE_BINARY_DIR}/libziparchive)
-          endif()
-          
-          # Build androidfw from source (Android framework library)
-          if(EXISTS ${CMAKE_SOURCE_DIR}/../base/libs/androidfw/CMakeLists.txt)
-              add_subdirectory(${CMAKE_SOURCE_DIR}/../base/libs/androidfw ${CMAKE_BINARY_DIR}/androidfw)
-          elseif(EXISTS ${CMAKE_SOURCE_DIR}/../base/CMakeLists.txt)
-              add_subdirectory(${CMAKE_SOURCE_DIR}/../base ${CMAKE_BINARY_DIR}/androidfw)
-          endif()
           
           # Build zopfli from source (compression library)
           if(EXISTS ${CMAKE_SOURCE_DIR}/../zopfli/CMakeLists.txt)
@@ -174,15 +134,8 @@ jobs:
               add_subdirectory(${CMAKE_SOURCE_DIR}/../pcre ${CMAKE_BINARY_DIR}/pcre)
           endif()
           
-          # Build boringssl from source (SSL library)
-          # Note: Benchmarks are disabled globally above
-          if(EXISTS ${CMAKE_SOURCE_DIR}/../boringssl/CMakeLists.txt)
-              add_subdirectory(${CMAKE_SOURCE_DIR}/../boringssl ${CMAKE_BINARY_DIR}/boringssl)
-          endif()
-          
           # Build expat from source (XML parser)
           if(EXISTS ${CMAKE_SOURCE_DIR}/../expat/expat/CMakeLists.txt)
-              # Disable tests and examples to avoid benchmark target name conflicts
               set(EXPAT_BUILD_TESTS OFF CACHE BOOL "Disable expat tests" FORCE)
               set(EXPAT_BUILD_EXAMPLES OFF CACHE BOOL "Disable expat examples" FORCE)
               add_subdirectory(${CMAKE_SOURCE_DIR}/../expat/expat ${CMAKE_BINARY_DIR}/expat)
@@ -193,47 +146,205 @@ jobs:
               add_subdirectory(${CMAKE_SOURCE_DIR}/../libpng ${CMAKE_BINARY_DIR}/libpng)
           endif()
           
-          # Build protobuf from source (Protocol Buffers)
-          if(EXISTS ${CMAKE_SOURCE_DIR}/../protobuf/cmake/CMakeLists.txt)
-              add_subdirectory(${CMAKE_SOURCE_DIR}/../protobuf/cmake ${CMAKE_BINARY_DIR}/protobuf)
-          endif()
-          
           # Find required system packages
-          # Note: These are still REQUIRED as some dependencies may not have CMakeLists.txt
-          # or may need system versions of these libraries for linking
           find_package(Protobuf REQUIRED)
           find_package(ZLIB REQUIRED)
           find_package(PNG REQUIRED)
           find_package(EXPAT REQUIRED)
           
-          # Include directories
+          # Define base source directory
+          set(ANDROID_SRC_DIR ${CMAKE_SOURCE_DIR}/..)
+          
+          # Print diagnostic info
+          message(STATUS "Android source directory: ${ANDROID_SRC_DIR}")
+          message(STATUS "Looking for AAPT2 sources in: ${ANDROID_SRC_DIR}/base/tools/aapt2")
+          
+          # Include directories for all Android headers
           include_directories(
-              ${CMAKE_SOURCE_DIR}/../base/tools/aapt2
-              ${CMAKE_SOURCE_DIR}/../base/tools/aapt2/include
-              ${CMAKE_SOURCE_DIR}/../base/libs/androidfw/include
-              ${CMAKE_SOURCE_DIR}/../base/include
-              ${CMAKE_SOURCE_DIR}/../native/include
-              ${CMAKE_SOURCE_DIR}/../libbase/include
-              ${CMAKE_SOURCE_DIR}/../fmtlib/include
-              ${CMAKE_SOURCE_DIR}/../core/libutils/include
-              ${CMAKE_SOURCE_DIR}/../core/include
-              ${CMAKE_SOURCE_DIR}/../incremental_delivery/incfs/util/include
-              ${CMAKE_SOURCE_DIR}/../logging/liblog/include
+              ${ANDROID_SRC_DIR}/base/tools/aapt2
+              ${ANDROID_SRC_DIR}/base/tools/aapt2/include
+              ${ANDROID_SRC_DIR}/base/libs/androidfw/include
+              ${ANDROID_SRC_DIR}/base/include
+              ${ANDROID_SRC_DIR}/native/include
+              ${ANDROID_SRC_DIR}/native/libs/binder/include
+              ${ANDROID_SRC_DIR}/libbase/include
+              ${ANDROID_SRC_DIR}/fmtlib/include
+              ${ANDROID_SRC_DIR}/core/libutils/include
+              ${ANDROID_SRC_DIR}/core/include
+              ${ANDROID_SRC_DIR}/core/libcutils/include
+              ${ANDROID_SRC_DIR}/core/liblog/include
+              ${ANDROID_SRC_DIR}/incremental_delivery/incfs/util/include
+              ${ANDROID_SRC_DIR}/logging/liblog/include
+              ${ANDROID_SRC_DIR}/libziparchive/include
+              ${ANDROID_SRC_DIR}/selinux/libselinux/include
+              ${ANDROID_SRC_DIR}/protobuf/src
+              ${CMAKE_BINARY_DIR}
               ${PROTOBUF_INCLUDE_DIRS}
           )
           
-          # Collect AAPT2 source files
+          # First, build required Android libraries as static libraries
+          
+          # --- Build libbase (Android base library) ---
+          file(GLOB LIBBASE_SOURCES 
+              "${ANDROID_SRC_DIR}/libbase/*.cpp"
+          )
+          list(FILTER LIBBASE_SOURCES EXCLUDE REGEX ".*_test\\.cpp$")
+          list(FILTER LIBBASE_SOURCES EXCLUDE REGEX ".*_benchmark\\.cpp$")
+          if(LIBBASE_SOURCES)
+              message(STATUS "Found libbase sources: ${LIBBASE_SOURCES}")
+              add_library(android_base STATIC ${LIBBASE_SOURCES})
+              target_include_directories(android_base PUBLIC
+                  ${ANDROID_SRC_DIR}/libbase/include
+                  ${ANDROID_SRC_DIR}/logging/liblog/include
+                  ${ANDROID_SRC_DIR}/fmtlib/include
+              )
+              target_link_libraries(android_base fmt::fmt)
+          else()
+              message(WARNING "libbase sources not found")
+          endif()
+          
+          # --- Build liblog (Android logging library) ---
+          file(GLOB LIBLOG_SOURCES 
+              "${ANDROID_SRC_DIR}/logging/liblog/*.cpp"
+          )
+          list(FILTER LIBLOG_SOURCES EXCLUDE REGEX ".*_test\\.cpp$")
+          list(FILTER LIBLOG_SOURCES EXCLUDE REGEX ".*_benchmark\\.cpp$")
+          if(LIBLOG_SOURCES)
+              message(STATUS "Found liblog sources")
+              add_library(android_log STATIC ${LIBLOG_SOURCES})
+              target_include_directories(android_log PUBLIC
+                  ${ANDROID_SRC_DIR}/logging/liblog/include
+                  ${ANDROID_SRC_DIR}/libbase/include
+              )
+          endif()
+          
+          # --- Build libutils (Android utilities) ---
+          file(GLOB LIBUTILS_SOURCES 
+              "${ANDROID_SRC_DIR}/core/libutils/*.cpp"
+          )
+          list(FILTER LIBUTILS_SOURCES EXCLUDE REGEX ".*_test\\.cpp$")
+          list(FILTER LIBUTILS_SOURCES EXCLUDE REGEX ".*_benchmark\\.cpp$")
+          list(FILTER LIBUTILS_SOURCES EXCLUDE REGEX ".*_fuzz\\.cpp$")
+          if(LIBUTILS_SOURCES)
+              message(STATUS "Found libutils sources")
+              add_library(android_utils STATIC ${LIBUTILS_SOURCES})
+              target_include_directories(android_utils PUBLIC
+                  ${ANDROID_SRC_DIR}/core/libutils/include
+                  ${ANDROID_SRC_DIR}/core/include
+                  ${ANDROID_SRC_DIR}/libbase/include
+                  ${ANDROID_SRC_DIR}/logging/liblog/include
+              )
+              if(TARGET android_base)
+                  target_link_libraries(android_utils android_base)
+              endif()
+          endif()
+          
+          # --- Build libcutils (Android C utilities) ---
+          file(GLOB LIBCUTILS_SOURCES 
+              "${ANDROID_SRC_DIR}/core/libcutils/*.cpp"
+              "${ANDROID_SRC_DIR}/core/libcutils/*.c"
+          )
+          list(FILTER LIBCUTILS_SOURCES EXCLUDE REGEX ".*_test\\.cpp$")
+          if(LIBCUTILS_SOURCES)
+              message(STATUS "Found libcutils sources")
+              add_library(android_cutils STATIC ${LIBCUTILS_SOURCES})
+              target_include_directories(android_cutils PUBLIC
+                  ${ANDROID_SRC_DIR}/core/libcutils/include
+                  ${ANDROID_SRC_DIR}/core/include
+                  ${ANDROID_SRC_DIR}/libbase/include
+                  ${ANDROID_SRC_DIR}/logging/liblog/include
+              )
+          endif()
+          
+          # --- Build libziparchive ---
+          file(GLOB LIBZIPARCHIVE_SOURCES 
+              "${ANDROID_SRC_DIR}/libziparchive/*.cpp"
+          )
+          list(FILTER LIBZIPARCHIVE_SOURCES EXCLUDE REGEX ".*_test\\.cpp$")
+          list(FILTER LIBZIPARCHIVE_SOURCES EXCLUDE REGEX ".*_benchmark\\.cpp$")
+          list(FILTER LIBZIPARCHIVE_SOURCES EXCLUDE REGEX ".*_fuzzer\\.cpp$")
+          list(FILTER LIBZIPARCHIVE_SOURCES EXCLUDE REGEX ".*unzip\\.cpp$")
+          if(LIBZIPARCHIVE_SOURCES)
+              message(STATUS "Found libziparchive sources")
+              add_library(android_ziparchive STATIC ${LIBZIPARCHIVE_SOURCES})
+              target_include_directories(android_ziparchive PUBLIC
+                  ${ANDROID_SRC_DIR}/libziparchive/include
+                  ${ANDROID_SRC_DIR}/libbase/include
+                  ${ANDROID_SRC_DIR}/logging/liblog/include
+              )
+              target_link_libraries(android_ziparchive ${ZLIB_LIBRARIES})
+              if(TARGET android_base)
+                  target_link_libraries(android_ziparchive android_base)
+              endif()
+          endif()
+          
+          # --- Build androidfw (Android framework library) ---
+          file(GLOB_RECURSE ANDROIDFW_SOURCES 
+              "${ANDROID_SRC_DIR}/base/libs/androidfw/*.cpp"
+          )
+          list(FILTER ANDROIDFW_SOURCES EXCLUDE REGEX ".*_test\\.cpp$")
+          list(FILTER ANDROIDFW_SOURCES EXCLUDE REGEX ".*_benchmark\\.cpp$")
+          list(FILTER ANDROIDFW_SOURCES EXCLUDE REGEX ".*/tests/.*")
+          if(ANDROIDFW_SOURCES)
+              message(STATUS "Found androidfw sources: found ${CMAKE_MATCH_COUNT} files")
+              add_library(androidfw STATIC ${ANDROIDFW_SOURCES})
+              target_include_directories(androidfw PUBLIC
+                  ${ANDROID_SRC_DIR}/base/libs/androidfw/include
+                  ${ANDROID_SRC_DIR}/base/include
+                  ${ANDROID_SRC_DIR}/native/include
+                  ${ANDROID_SRC_DIR}/libbase/include
+                  ${ANDROID_SRC_DIR}/logging/liblog/include
+                  ${ANDROID_SRC_DIR}/libziparchive/include
+                  ${ANDROID_SRC_DIR}/incremental_delivery/incfs/util/include
+              )
+              target_link_libraries(androidfw 
+                  fmt::fmt
+                  ${ZLIB_LIBRARIES}
+                  PNG::PNG
+                  ${EXPAT_LIBRARIES}
+              )
+              if(TARGET android_base)
+                  target_link_libraries(androidfw android_base)
+              endif()
+              if(TARGET android_ziparchive)
+                  target_link_libraries(androidfw android_ziparchive)
+              endif()
+              if(TARGET android_utils)
+                  target_link_libraries(androidfw android_utils)
+              endif()
+          else()
+              message(WARNING "androidfw sources not found!")
+          endif()
+          
+          # --- Collect and build AAPT2 ---
           file(GLOB_RECURSE AAPT2_SOURCES 
-              "${CMAKE_SOURCE_DIR}/../base/tools/aapt2/*.cpp"
+              "${ANDROID_SRC_DIR}/base/tools/aapt2/*.cpp"
           )
           
-          # Remove test files
+          # Remove test and benchmark files
           list(FILTER AAPT2_SOURCES EXCLUDE REGEX ".*_test\\.cpp$")
+          list(FILTER AAPT2_SOURCES EXCLUDE REGEX ".*_benchmark\\.cpp$")
           list(FILTER AAPT2_SOURCES EXCLUDE REGEX ".*/tests/.*")
+          list(FILTER AAPT2_SOURCES EXCLUDE REGEX ".*/integration-tests/.*")
           
-          # Build AAPT2 executable
+          # Show how many sources were found
+          list(LENGTH AAPT2_SOURCES AAPT2_SOURCE_COUNT)
+          message(STATUS "Found ${AAPT2_SOURCE_COUNT} AAPT2 source files")
+          
           if(AAPT2_SOURCES)
+              # Generate protobuf files if needed
+              file(GLOB AAPT2_PROTO_FILES "${ANDROID_SRC_DIR}/base/tools/aapt2/*.proto")
+              if(AAPT2_PROTO_FILES)
+                  message(STATUS "Found proto files: ${AAPT2_PROTO_FILES}")
+                  protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${AAPT2_PROTO_FILES})
+                  list(APPEND AAPT2_SOURCES ${PROTO_SRCS})
+              endif()
+              
               add_executable(aapt2 ${AAPT2_SOURCES})
+              target_compile_definitions(aapt2 PRIVATE 
+                  -D__ANDROID_HOST__
+                  -D_GNU_SOURCE
+              )
               target_link_libraries(aapt2 
                   fmt::fmt
                   ${PROTOBUF_LIBRARIES}
@@ -242,9 +353,31 @@ jobs:
                   ${EXPAT_LIBRARIES}
                   pthread
               )
+              if(TARGET androidfw)
+                  target_link_libraries(aapt2 androidfw)
+              endif()
+              if(TARGET android_base)
+                  target_link_libraries(aapt2 android_base)
+              endif()
+              if(TARGET android_ziparchive)
+                  target_link_libraries(aapt2 android_ziparchive)
+              endif()
+              if(TARGET android_utils)
+                  target_link_libraries(aapt2 android_utils)
+              endif()
+              if(TARGET android_log)
+                  target_link_libraries(aapt2 android_log)
+              endif()
+              if(TARGET android_cutils)
+                  target_link_libraries(aapt2 android_cutils)
+              endif()
               
-              # Build 64-bit version
+              # Build 64-bit version (on x64 systems this is the same)
               add_executable(aapt2_64 ${AAPT2_SOURCES})
+              target_compile_definitions(aapt2_64 PRIVATE 
+                  -D__ANDROID_HOST__
+                  -D_GNU_SOURCE
+              )
               set_target_properties(aapt2_64 PROPERTIES COMPILE_FLAGS "-m64")
               target_link_libraries(aapt2_64 
                   fmt::fmt
@@ -254,20 +387,46 @@ jobs:
                   ${EXPAT_LIBRARIES}
                   pthread
               )
+              if(TARGET androidfw)
+                  target_link_libraries(aapt2_64 androidfw)
+              endif()
+              if(TARGET android_base)
+                  target_link_libraries(aapt2_64 android_base)
+              endif()
+              if(TARGET android_ziparchive)
+                  target_link_libraries(aapt2_64 android_ziparchive)
+              endif()
+              if(TARGET android_utils)
+                  target_link_libraries(aapt2_64 android_utils)
+              endif()
+              if(TARGET android_log)
+                  target_link_libraries(aapt2_64 android_log)
+              endif()
+              if(TARGET android_cutils)
+                  target_link_libraries(aapt2_64 android_cutils)
+              endif()
+          else()
+              message(FATAL_ERROR "No AAPT2 source files found in ${ANDROID_SRC_DIR}/base/tools/aapt2")
           endif()
           
-          # Collect AAPT source files
+          # --- Collect and build AAPT ---
           file(GLOB_RECURSE AAPT_SOURCES 
-              "${CMAKE_SOURCE_DIR}/../base/tools/aapt/*.cpp"
+              "${ANDROID_SRC_DIR}/base/tools/aapt/*.cpp"
           )
           
           # Remove test files
           list(FILTER AAPT_SOURCES EXCLUDE REGEX ".*_test\\.cpp$")
           list(FILTER AAPT_SOURCES EXCLUDE REGEX ".*/tests/.*")
           
-          # Build AAPT executable
+          list(LENGTH AAPT_SOURCES AAPT_SOURCE_COUNT)
+          message(STATUS "Found ${AAPT_SOURCE_COUNT} AAPT source files")
+          
           if(AAPT_SOURCES)
               add_executable(aapt ${AAPT_SOURCES})
+              target_compile_definitions(aapt PRIVATE 
+                  -D__ANDROID_HOST__
+                  -D_GNU_SOURCE
+              )
               target_link_libraries(aapt 
                   fmt::fmt
                   ${ZLIB_LIBRARIES}
@@ -275,9 +434,22 @@ jobs:
                   ${EXPAT_LIBRARIES}
                   pthread
               )
+              if(TARGET androidfw)
+                  target_link_libraries(aapt androidfw)
+              endif()
+              if(TARGET android_base)
+                  target_link_libraries(aapt android_base)
+              endif()
+              if(TARGET android_utils)
+                  target_link_libraries(aapt android_utils)
+              endif()
               
               # Build 64-bit version
               add_executable(aapt_64 ${AAPT_SOURCES})
+              target_compile_definitions(aapt_64 PRIVATE 
+                  -D__ANDROID_HOST__
+                  -D_GNU_SOURCE
+              )
               set_target_properties(aapt_64 PROPERTIES COMPILE_FLAGS "-m64")
               target_link_libraries(aapt_64 
                   fmt::fmt
@@ -286,16 +458,47 @@ jobs:
                   ${EXPAT_LIBRARIES}
                   pthread
               )
+              if(TARGET androidfw)
+                  target_link_libraries(aapt_64 androidfw)
+              endif()
+              if(TARGET android_base)
+                  target_link_libraries(aapt_64 android_base)
+              endif()
+              if(TARGET android_utils)
+                  target_link_libraries(aapt_64 android_utils)
+              endif()
+          else()
+              message(WARNING "No AAPT source files found in ${ANDROID_SRC_DIR}/base/tools/aapt")
           endif()
           EOF
       
       - name: Build AAPT2 binaries
         run: |
           cd src/build
-          cmake -G "Unix Makefiles" .
-          make -j$(nproc) VERBOSE=1 || true
           
-          echo "Build completed. Checking for binaries..."
+          echo "=== CMake Configuration ==="
+          cmake -G "Unix Makefiles" . 2>&1 | tee cmake_output.log
+          
+          echo ""
+          echo "=== Starting Build ==="
+          # Build with limited parallelism to avoid memory issues
+          make -j2 VERBOSE=1 2>&1 | tee build_output.log
+          BUILD_STATUS=${PIPESTATUS[0]}
+          
+          echo ""
+          echo "=== Build Status: $BUILD_STATUS ==="
+          
+          if [ $BUILD_STATUS -ne 0 ]; then
+            echo "=== Build Failed - Last 100 lines of output ==="
+            tail -100 build_output.log
+            echo ""
+            echo "=== Checking for specific errors ==="
+            grep -i "error:" build_output.log | head -50 || true
+          fi
+          
+          echo ""
+          echo "=== Build completed. Checking for binaries... ==="
+          ls -lh aapt* 2>/dev/null || echo "No aapt binaries found"
           ls -lh || true
       
       - name: Strip binaries
