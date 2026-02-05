@@ -286,7 +286,8 @@ jobs:
           list(FILTER ANDROIDFW_SOURCES EXCLUDE REGEX ".*_benchmark\\.cpp$")
           list(FILTER ANDROIDFW_SOURCES EXCLUDE REGEX ".*/tests/.*")
           if(ANDROIDFW_SOURCES)
-              message(STATUS "Found androidfw sources: found ${CMAKE_MATCH_COUNT} files")
+              list(LENGTH ANDROIDFW_SOURCES ANDROIDFW_SOURCE_COUNT)
+              message(STATUS "Found androidfw sources: ${ANDROIDFW_SOURCE_COUNT} files")
               add_library(androidfw STATIC ${ANDROIDFW_SOURCES})
               target_include_directories(androidfw PUBLIC
                   ${ANDROID_SRC_DIR}/base/libs/androidfw/include
@@ -342,8 +343,8 @@ jobs:
               
               add_executable(aapt2 ${AAPT2_SOURCES})
               target_compile_definitions(aapt2 PRIVATE 
-                  -D__ANDROID_HOST__
-                  -D_GNU_SOURCE
+                  __ANDROID_HOST__
+                  _GNU_SOURCE
               )
               target_link_libraries(aapt2 
                   fmt::fmt
@@ -375,8 +376,8 @@ jobs:
               # Build 64-bit version (on x64 systems this is the same)
               add_executable(aapt2_64 ${AAPT2_SOURCES})
               target_compile_definitions(aapt2_64 PRIVATE 
-                  -D__ANDROID_HOST__
-                  -D_GNU_SOURCE
+                  __ANDROID_HOST__
+                  _GNU_SOURCE
               )
               set_target_properties(aapt2_64 PROPERTIES COMPILE_FLAGS "-m64")
               target_link_libraries(aapt2_64 
@@ -424,8 +425,8 @@ jobs:
           if(AAPT_SOURCES)
               add_executable(aapt ${AAPT_SOURCES})
               target_compile_definitions(aapt PRIVATE 
-                  -D__ANDROID_HOST__
-                  -D_GNU_SOURCE
+                  __ANDROID_HOST__
+                  _GNU_SOURCE
               )
               target_link_libraries(aapt 
                   fmt::fmt
@@ -447,8 +448,8 @@ jobs:
               # Build 64-bit version
               add_executable(aapt_64 ${AAPT_SOURCES})
               target_compile_definitions(aapt_64 PRIVATE 
-                  -D__ANDROID_HOST__
-                  -D_GNU_SOURCE
+                  __ANDROID_HOST__
+                  _GNU_SOURCE
               )
               set_target_properties(aapt_64 PROPERTIES COMPILE_FLAGS "-m64")
               target_link_libraries(aapt_64 
